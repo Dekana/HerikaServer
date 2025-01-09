@@ -289,10 +289,10 @@ $ITT["google_openai"]["AI_PROMPT"]='#HERIKA_NPC1# describes what they are seeing
 $ITT["AZURE"]["ENDPOINT"]=""; //API endpoint.
 $ITT["AZURE"]["API_KEY"]=""; //API key.
 //Llama
-$ITT["LLAMACPP"]["URL"]="http://127.0.0.1:8007"; //Server endpoint.		
-$ITT["LLAMACPP"]["AI_VISION_PROMPT"]="USER:Context, roleplay In Skyrim universe, #HERIKA_NPC1# watchs this scene:[img-1]. "
+$ITT["llamacpp"]["URL"]="http://127.0.0.1:8007"; //Server endpoint.		
+$ITT["llamacpp"]["AI_VISION_PROMPT"]="USER:Context, roleplay In Skyrim universe, #HERIKA_NPC1# watchs this scene:[img-1]. "
     . "Describe the vision while keeping roleplay. Describe COLORS and SHAPES";	//Prompt to sent to the Vision AI.
-$ITT["LLAMACPP"]["AI_PROMPT"]=''; //Prompt sent to the LLM.
+$ITT["llamacpp"]["AI_PROMPT"]=''; //Prompt sent to the LLM.
 
 //[Memory Configuration]
 //Memory Settings
