@@ -286,7 +286,7 @@
       "AI_VISION_PROMPT": {"type":"longstring","description":"Prompt to send to the OpenAI vision model.","scope":"global"},
       "AI_PROMPT": {"type":"longstring","description":"Prompt for the AI NPC to follow when describing the scene."}
     },
-    "LLAMACPP": {
+    "llamacpp": {
       "_title":"LLama Server (Installed in DwemerDistro)",
       "URL": {"type":"url","description":"URL of the llama.cpp server","helpurl":"https://github.com/ggerganov/llama.cpp/blob/master/examples/server/README.md","scope":"global"},
       "AI_VISION_PROMPT": {"type":"longstring","description":"Prompt to send to the llama vision model.","scope":"global"},
