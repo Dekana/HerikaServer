@@ -390,12 +390,12 @@ class connector
 
     }
 
-	public function send($url, $context) {
-		if (isset($GLOBALS['mockConnectorSend'])) {
-			return call_user_func($GLOBALS['mockConnectorSend'], $url, $context);
-		}
-		return fopen($url, 'r', false, $context);
-	}
+    public function send($url, $context) {
+        if (isset($GLOBALS['mockConnectorSend'])) {
+            return call_user_func($GLOBALS['mockConnectorSend'], $url, $context);
+        }
+        return fopen($url, 'r', false, $context);
+    }
 
     
 
