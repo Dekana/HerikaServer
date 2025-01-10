@@ -18,6 +18,7 @@ require($path . "conf".DIRECTORY_SEPARATOR."conf.php");
 require_once($path . "lib" .DIRECTORY_SEPARATOR."auditing.php");
 require_once($path . "lib" .DIRECTORY_SEPARATOR."model_dynmodel.php");
 require_once($path . "lib" .DIRECTORY_SEPARATOR."{$GLOBALS["DBDRIVER"]}.class.php");
+require_once($path . "lib" .DIRECTORY_SEPARATOR."minimet5_service.php");
 require_once($path . "lib" .DIRECTORY_SEPARATOR."data_functions.php");
 require_once($path . "lib" .DIRECTORY_SEPARATOR."chat_helper_functions.php");
 require_once($path . "lib" .DIRECTORY_SEPARATOR."memory_helper_vectordb_txtai.php");
@@ -26,7 +27,7 @@ requireFilesRecursively($path . "ext".DIRECTORY_SEPARATOR,"globals.php");
 
 // PARSE GET RESPONSE into $gameRequest
 
-if (php_sapi_name()=="cli") {
+if (php_sapi_name()=="cli" && !getenv('PHPUNIT_TEST')) {
     // You can run this script directly with php: main.php "Player text"
     $GLOBALS["db"] = new sql();
 
@@ -67,7 +68,7 @@ if (!isset($FUNCTIONS_ARE_ENABLED)) {
 
 
 
-while (@ob_end_clean())	;
+while (!getenv('PHPUNIT_TEST') && @ob_end_clean())	;
 ignore_user_abort(true);
 set_time_limit(1200);
 
@@ -438,7 +439,7 @@ if ($gameRequest[0] != "diary") {
             'gamets' => $gameRequest[2],
             'type' => $gameRequest[0],
             'data' => ($gameRequest[3]),
-            'sess' => (php_sapi_name()=="cli")?'cli':'web',
+            'sess' => (php_sapi_name()=="cli" && !getenv('PHPUNIT_TEST'))?'cli':'web',
             'localts' => time(),
             'people'=> $GLOBALS["CACHE_PEOPLE"],
             'location'=>$GLOBALS["CACHE_LOCATION"],
@@ -549,7 +550,7 @@ if ($GLOBALS["FUNCTIONS_ARE_ENABLED"]) {
         
 
         $TEST_TEXT=strtr($TEST_TEXT,["."=>" ","{$GLOBALS["PLAYER_NAME"]}:"=>""]);
-        $command=file_get_contents("http://127.0.0.1:8082/command?text=".urlencode($TEST_TEXT));
+        $command=minimeCommand($TEST_TEXT);
         if ($command && $command !== "null") {
             $preCommand=json_decode($command,true);
             if ($preCommand["is_command"]!="Talk") {
@@ -934,14 +935,14 @@ if (sizeof($talkedSoFar) == 0) {
             );
             */
             // Log Memory also.
-            if ((php_sapi_name()!="cli"))	
+            if ((php_sapi_name()!="cli") || getenv('PHPUNIT_TEST'))	
 	            logMemory($GLOBALS["HERIKA_NAME"], $GLOBALS["HERIKA_NAME"],implode(" ", $talkedSoFar), $momentum, $gameRequest[2],$gameRequest[0],$gameRequest[1]);
             returnLines([$RESPONSE_OK_NOTED]);
 
         } else {
             
             $lastPlayerLine=$db->fetchAll("SELECT data from eventlog where type in ('inputtext','inputtext_s') order by gamets desc limit 1 offset 0");
-            if (php_sapi_name()!="cli")	{
+            if (php_sapi_name()!="cli" || getenv('PHPUNIT_TEST'))	{
                 if (in_array($gameRequest[0],["inputtext","inputtext_s"]))
                     // logMemory($GLOBALS["HERIKA_NAME"], $GLOBALS["PLAYER_NAME"], "{$lastPlayerLine[0]["data"]} \n\r {$GLOBALS["HERIKA_NAME"]}:".implode(" ", $talkedSoFar), $momentum, $gameRequest[2],$gameRequest[1]);
                     ;
@@ -959,7 +960,7 @@ if (sizeof($talkedSoFar) == 0) {
 
 echo 'X-CUSTOM-CLOSE'.PHP_EOL;
 
-if (php_sapi_name()=="cli") {
+if (php_sapi_name()=="cli" && !getenv('PHPUNIT_TEST')) {
     echo PHP_EOL;
     file_put_contents("log/debug_comm_".basename(__FILE__).".log", print_r($GLOBALS["DEBUG_DATA"], true));
 
@@ -972,7 +973,7 @@ if (php_sapi_name()=="cli") {
 if ($semaphore) 
     sem_release($semaphore);
 
-while(@ob_end_clean());
+while(!getenv("PHPUNIT_TEST") && @ob_end_clean());
 require(__DIR__.DIRECTORY_SEPARATOR."processor".DIRECTORY_SEPARATOR."postrequest.php");
 
 

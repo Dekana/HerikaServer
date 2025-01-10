@@ -38,7 +38,7 @@ if ($GLOBALS["MINIME_T5"]) {
             $currentOghmaTopic_req=$db->fetchOne("select value from conf_opts where id='current_oghma_topic'");
             $currentOghmaTopic=getArrayKey($currentOghmaTopic_req,"value");
            
-            $topic_req=file_get_contents("http://127.0.0.1:8082/topic?text=".urlencode($INPUT_TEXT));
+			$topic_req=minimeTopic($INPUT_TEXT);
             
             if ($topic_req) {
                 $topic_res=json_decode($topic_req,true);

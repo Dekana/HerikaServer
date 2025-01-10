@@ -355,7 +355,7 @@ class connector
 
         $context = stream_context_create($options);
         
-        $this->primary_handler = fopen($url, 'r', false, $context);
+        $this->primary_handler = $this->send($url, $context);
         if (!$this->primary_handler) {
             $error=error_get_last();
             error_log(print_r($error,true));
@@ -389,6 +389,13 @@ class connector
 
 
     }
+
+	public function send($url, $context) {
+		if (isset($GLOBALS['mockConnectorSend'])) {
+			return call_user_func($GLOBALS['mockConnectorSend'], $url, $context);
+		}
+		return fopen($url, 'r', false, $context);
+	}
 
     
 

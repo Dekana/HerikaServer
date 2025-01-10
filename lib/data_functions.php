@@ -1464,7 +1464,7 @@ function DataSearchMemory($rawstring,$npcfilter) {
         $pattern = '/\(talking to [^()]+\)/i';
         $TEST_TEXT = preg_replace($pattern, '', $TEST_TEXT);
 
-        $keywords=file_get_contents("http://127.0.0.1:8082/extract?text=".urlencode($TEST_TEXT));
+        $keywords=minimeExtract($TEST_TEXT);
         $reponse=json_decode($keywords,true);
         
         //print_r($reponse);
