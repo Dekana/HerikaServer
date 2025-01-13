@@ -1836,7 +1836,15 @@ function createProfile($npcname,$FORCE_PARMS=[],$overwrite=false) {
             unset($file_lines[$i]);
         }
         
-        $npcTemlate=$db->fetchAll("SELECT npc_pers FROM combined_npc_templates where npc_name='$codename'");
+        if (empty($GLOBALS["CORE_LANG"])) {
+            $npcTemlate=$db->fetchAll("SELECT npc_pers FROM combined_npc_templates where npc_name='$codename'");
+
+        } else {
+            $npcTemlate=$db->fetchAll("SELECT npc_pers FROM npc_templates_trl where name_trl='$codename' and lang='{$GLOBALS["CORE_LANG"]}'");
+            if (!isset($npcTemlate[0])) {
+                $npcTemlate=$db->fetchAll("SELECT npc_pers FROM combined_npc_templates where npc_name='$codename'");
+            }
+        }
         
         // Consider adding here notes like 'They Just met' into profile.
         
