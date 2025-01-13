@@ -1838,8 +1838,10 @@ function createProfile($npcname,$FORCE_PARMS=[],$overwrite=false) {
             $npcTemlate=$db->fetchAll("SELECT npc_pers FROM combined_npc_templates where npc_name='$codename'");
 
         } else {
+            error_log("Using npc_templates_trl, name_trl='$codename' and lang='{$GLOBALS["CORE_LANG"]}'");
             $npcTemlate=$db->fetchAll("SELECT npc_pers FROM npc_templates_trl where name_trl='$codename' and lang='{$GLOBALS["CORE_LANG"]}'");
             if (!isset($npcTemlate[0])) {
+                error_log("No trl found, using standard template");
                 $npcTemlate=$db->fetchAll("SELECT npc_pers FROM combined_npc_templates where npc_name='$codename'");
             }
         }
