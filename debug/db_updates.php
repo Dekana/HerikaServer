@@ -347,21 +347,10 @@ if (!$existsColumn[0]["column_name"]) {
     echo '<script>alert("A patch (expanded npc table) has been applied to Database")</script>';
 }
 
-/*
-    $data = $db->fetchAll("SELECT name_trl3,npc_name FROM npc_templates_trl");
-        
-    foreach ($data as $n=>$element) {
-        $currentName=$element["name_trl3"];
-        $codename=strtr(strtolower(trim($currentName)),[" "=>"_","'"=>"+","."=>""]);
-        $cn=$db->escape($codename);
-        $on=$db->escape($element["npc_name"]);
-        $db->execQuery("update npc_templates_trl set name_trl='$cn' where npc_name='$on'");
+// <<<<<<< personalities-plugin
+$path = dirname((__FILE__)) . DIRECTORY_SEPARATOR;
+require_once("$path/add_json_personalities.php");
 
-    }
-    $db->execQuery("update npc_templates_trl set name_trl=npc_name where name_trl ilike '%desconocido%'");
-    error_log("Silent npc_templates_trl patch applied");
-
-*/
 
 $query = "
     SELECT column_name 
@@ -374,4 +363,5 @@ if (!$existsColumn[0]["column_name"]) {
     $db->execQuery(file_get_contents(__DIR__."/../data/npc_templates_trl_v1.sql"));
     echo '<script>alert("A patch (pc_templates_trl) has been applied to Database")</script>';
 }
+
 ?>
