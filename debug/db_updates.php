@@ -347,7 +347,21 @@ if (!$existsColumn[0]["column_name"]) {
     echo '<script>alert("A patch (expanded npc table) has been applied to Database")</script>';
 }
 
+// <<<<<<< personalities-plugin
 $path = dirname((__FILE__)) . DIRECTORY_SEPARATOR;
 require_once("$path/add_json_personalities.php");
+
+
+$query = "
+    SELECT column_name 
+    FROM information_schema.columns 
+    WHERE table_name = 'npc_templates_trl' AND column_name = 'npc_misc'
+";
+
+$existsColumn=$db->fetchAll($query);
+if (!$existsColumn[0]["column_name"]) {
+    $db->execQuery(file_get_contents(__DIR__."/../data/npc_templates_trl_v1.sql"));
+    echo '<script>alert("A patch (pc_templates_trl) has been applied to Database")</script>';
+}
 
 ?>
