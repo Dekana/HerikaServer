@@ -13,6 +13,12 @@ curl -X 'POST' \
 }'
 */
 
+$melotts_pronunciation_file = dirname(__FILE__) . DIRECTORY_SEPARATOR ."tts-melotts_pronunciation.php";
+if (file_exists($melotts_pronunciation_file)) {
+    include_once($melotts_pronunciation_file);
+    //error_log("melotts pronunciation adjustment file found: " . $melotts_pronunciation_file);
+} 
+
 $GLOBALS["TTS_IN_USE"]=function($textString, $mood , $stringforhash) {
     
     $newString=$textString;
@@ -64,8 +70,18 @@ $GLOBALS["TTS_IN_USE"]=function($textString, $mood , $stringforhash) {
     if (empty($voice))
         error_log("Error, voiceid is no set");
 
+    $cleanString = $textString; 
+    if (function_exists('adjust_pronunciation')) {
+        if (function_exists('pronunciation_adjust_enabled')) 
+            $b_ok = pronunciation_adjust_enabled();
+        else 
+            $b_ok = true; 
+        //error_log("melotts pronunciation_adjust_enabled: " . ($b_ok ? "YES" : "NO"));
+        if ($b_ok) 
+            $cleanString = adjust_pronunciation($textString); // adjust English mispronunciations.
+    } else error_log("melotts info: pronunciation adjustments NOT defined.");
 
-    $finalData =["speaker"=>"$voice","text"=>"$textString","language"=>"EN","speed"=>$speed];
+    $finalData =["speaker"=>"$voice","text"=>"$cleanString","language"=>"EN","speed"=>$speed];
     //print_r($finalData);
 	
 	$options = array(
@@ -87,6 +103,7 @@ $GLOBALS["TTS_IN_USE"]=function($textString, $mood , $stringforhash) {
         $FFMPEG_FILTER='-af "'.implode(",",$GLOBALS["TTS_FFMPEG_FILTERS"]).'"';
         
     } else {
+
         $FFMPEG_FILTER='-filter:a "adelay=150|150"';
     }
 
