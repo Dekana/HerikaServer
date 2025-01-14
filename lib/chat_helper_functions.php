@@ -304,7 +304,10 @@ function returnLines($lines,$writeOutput=true)
             return;
         
         // Remove actions
-        $elapsedTimeAI= microtime(true) - $startTime;
+        if (isset($GLOBALS["startTimeAfterPlayerTTTS"]))
+            $elapsedTimeAI= microtime(true) - $GLOBALS["startTimeAfterPlayerTTTS"];
+        else
+            $elapsedTimeAI= microtime(true) - $startTime;
         //error_log("PRE LLM STATUS DONE 2: ". (microtime(true) - $startTime));
 
         $pattern = '/<[^>]+>/';
@@ -516,6 +519,7 @@ function returnLines($lines,$writeOutput=true)
                      $GLOBALS["SCRIPTLINE_ANIMATION"]="";
                 else {
                     if ((rand(0,4)!==0) ){ // Will disable animations, 20% chance to trigger
+                    //if (false) { // Will disable animations, 20% chance to trigger                        
                         $GLOBALS["SCRIPTLINE_ANIMATION"]="IdleDialogueExpressiveStart";
                     }
                     $GLOBALS["SCRIPTLINE_ANIMATION_SENT"]=true;

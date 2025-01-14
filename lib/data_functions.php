@@ -1,6 +1,6 @@
 <?php
 
-
+require_once("utils.php");
 
 // used for openai_token_count table
 
@@ -1804,10 +1804,8 @@ function createProfile($npcname,$FORCE_PARMS=[],$overwrite=false) {
     $path = dirname((__FILE__)) . DIRECTORY_SEPARATOR."..".DIRECTORY_SEPARATOR;
     $newConfFile=md5($npcname);
 
-    $codename=mb_convert_encoding($npcname, 'UTF-8', mb_detect_encoding($npcname));
-    $codename=strtr(strtolower(trim($codename)),[" "=>"_","'"=>"+"]);
-    $codename=preg_replace('/[^\w+]/u', '', $codename);
-
+    $codename = npcNameToCodename($npcname);
+    
     $cn=$db->escape("Voicetype/$codename");
     $vtype=$db->fetchAll("select value from conf_opts where id='$cn'");
     $voicetypeString=(isOk($vtype))?$vtype[0]["value"]:null;
@@ -1836,7 +1834,17 @@ function createProfile($npcname,$FORCE_PARMS=[],$overwrite=false) {
             unset($file_lines[$i]);
         }
         
-        $npcTemlate=$db->fetchAll("SELECT npc_pers FROM combined_npc_templates where npc_name='$codename'");
+        if (empty($GLOBALS["CORE_LANG"])) {
+            $npcTemlate=$db->fetchAll("SELECT npc_pers FROM combined_npc_templates where npc_name='$codename'");
+
+        } else {
+            error_log("Using npc_templates_trl, name_trl='$codename' and lang='{$GLOBALS["CORE_LANG"]}'");
+            $npcTemlate=$db->fetchAll("SELECT npc_pers FROM npc_templates_trl where name_trl='$codename' and lang='{$GLOBALS["CORE_LANG"]}'");
+            if (!isset($npcTemlate[0])) {
+                error_log("No trl found, using standard template");
+                $npcTemlate=$db->fetchAll("SELECT npc_pers FROM combined_npc_templates where npc_name='$codename'");
+            }
+        }
         
         // Consider adding here notes like 'They Just met' into profile.
         

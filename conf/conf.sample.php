@@ -314,4 +314,6 @@ $FEATURES["EXPERIMENTAL"]["KOBOLDCPP_ACTIONS"]=false; //KoboldCPP Actions.
 
 $OGHMA_INFINIUM=false;
 
+$FEATURES["MISC"]["LIFE_LINK_PLUGIN"]=false; // WIP. Use life link plugin for dynamic profiles
+
 ?>

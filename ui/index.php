@@ -56,9 +56,11 @@ include("tmpl/head.html");
 $db = new sql();
 
 
-/* Check for database updates */
-require_once(__DIR__."/../debug/db_updates.php");
-require_once(__DIR__."/../debug/npc_removal.php");
+/* Check for database updates only in index.php with no parms*/
+if (sizeof($_GET)==0) {
+    require_once(__DIR__."/../debug/db_updates.php");
+    require_once(__DIR__."/../debug/npc_removal.php");
+}
 /* END of check database for updates */
 
 /* Actions */
@@ -473,7 +475,7 @@ include("tmpl/navbar.php");
         echo '</td>';
     
         // Description cell
-        echo '<td>Adds more AI actions, Sapience, and NSFW integrations.</td>';
+        echo '<td>Extension for CHIM that expands its capabilities and optionally adds NSFW integrations.<br>Requirements: <a href="https://www.nexusmods.com/skyrimspecialedition/mods/16495" target="_blank">JContainers</a>, <a href="https://www.nexusmods.com/skyrimspecialedition/mods/22854" target="_blank">Papyrus Extender</a>, <a href="https://www.nexusmods.com/skyrimspecialedition/mods/36869" target="_blank">SPID</a></td>';
     
         // More Info cell with button
         echo '<td><a href="https://github.com/MinLL/MinAI" target="_blank" class="configure-plugin-btn">More Info</a></td>';

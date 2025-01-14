@@ -262,18 +262,19 @@ $query = "SELECT 1 as bad_syntax_exists  FROM public.npc_templates WHERE  npc_na
 $existsColumn=$db->fetchAll($query);
 if ($existsColumn[0]["bad_syntax_exists"]) {
     $data = $db->fetchAll("SELECT npc_name FROM public.npc_templates WHERE npc_name LIKE '%' || CHR(39) || '%'");
-        
+    $n=0;    
+    require_once(__DIR__."/../lib/utils.php");
     foreach ($data as $n=>$element) {
         $currentName=$element["npc_name"];
-        $codename=strtr(strtolower(trim($currentName)),[" "=>"_","'"=>"+"]);
-        $codename=preg_replace('/[^a-zA-Z0-9_+]/u', '', $codename);
+        $codename=npcNameToCodename($currentName);
         
         $cn=$db->escape($codename);
         $on=$db->escape($currentName);
-        $db->execQuery("update public.npc_templates set npc_name='$cn' where npc_name='$on'");
+        $db->execQuery("update public.npc_templates set npc_name='$cn' where npc_name='$on' and not exists (select 1 from public.npc_templates where npc_name='$cn')");
+        $n++;
 
     }
-    error_log("Silent npc_name patch applied");
+    error_log("Silent npc_name patch applied ($n npcs patched)");
 }
 
 $query = "SELECT 1 as bad_syntax_exists  FROM npc_templates_custom WHERE  npc_name LIKE '%' || CHR(39) || '%'";
@@ -345,6 +346,23 @@ if (!$existsColumn[0]["column_name"]) {
     $db->execQuery(file_get_contents(__DIR__."/../data/add_voiceid_to_templates_2stage.sql"));
 
     echo '<script>alert("A patch (expanded npc table) has been applied to Database")</script>';
+}
+
+// <<<<<<< personalities-plugin
+$path = dirname((__FILE__)) . DIRECTORY_SEPARATOR;
+require_once("$path/add_json_personalities.php");
+
+
+$query = "
+    SELECT column_name 
+    FROM information_schema.columns 
+    WHERE table_name = 'npc_templates_trl' AND column_name = 'npc_misc'
+";
+
+$existsColumn=$db->fetchAll($query);
+if (!$existsColumn[0]["column_name"]) {
+    $db->execQuery(file_get_contents(__DIR__."/../data/npc_templates_trl_v1.sql"));
+    echo '<script>alert("A patch (pc_templates_trl) has been applied to Database")</script>';
 }
 
 ?>
