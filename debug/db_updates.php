@@ -387,7 +387,7 @@ $query = "
 
 $existsColumn=$db->fetchAll($query);
 
-if (!$existsColumn[0]["version"] || !$existsColumn[0]["version"]<20250117001) {
+if (!$existsColumn[0]["version"] || $existsColumn[0]["version"]<20250117001) {
     $db->execQuery(file_get_contents(__DIR__."/../data/npc_templates_trl_es_v1.sql"));
     echo '<script>alert("A patch (npc_templates_trl [es]) has been applied to Database")</script>';
 }
