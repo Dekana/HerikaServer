@@ -413,6 +413,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Prepare profile options
     $OPTIONS = [];
+    $i = 0;
     foreach ($GLOBALS["PROFILES"] as $lProfkey => $lProfile) {
         $pattern = "/conf_([a-fA-F0-9]+)\.php/";
         if (preg_match($pattern, $lProfile, $matches)) {
@@ -420,13 +421,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (isset($characterMap["$hash"])) {
                 $name = $characterMap["$hash"];
                 $value = $lProfile;
-                $OPTIONS[] = ["value" => $value, "name" => $name];
+                $OPTIONS[] = [
+                    "value" => $value, 
+                    "name"  => $name, 
+                    "index" => $i 
+                ];
+                $i++; 
                 $LOCAL_CHAR_NAME = $name;
             }
         } else if ($lProfkey) {
             $name = "* $lProfkey";
             $value = $lProfile;
-            $OPTIONS[] = ["value" => $value, "name" => $name];
+            $OPTIONS[] = [
+                "value" => $value, 
+                "name"  => $name, 
+                "index" => $i 
+            ];
+            $i++; 
             $LOCAL_CHAR_NAME = $lProfkey;
         }
         if (isset($_SESSION["PROFILE"]) && $_SESSION["PROFILE"] == $lProfile) {
@@ -539,26 +550,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             /* Favorite Button */
             .favorite-btn {
                 position: absolute;
-                top: 50%; /* Center vertically */
-                right: 8px; /* Align to the right */
-                transform: translateY(-50%); /* Adjusts for the button's height to truly center it */
+                top: 50%; 
+                right: 1px; 
+                transform: translateY(-50%) scale(0.8); /* Scale the button to 80% of its original size */
                 background: none;
                 border: none;
                 cursor: pointer;
-                font-size: 36px; /* 2x the original size of 18px */
-                color: #FFD700; /* Gold color for visibility */
-                transition: color 0.3s;
-                font-weight: bold; /* Make icon bold */
-                z-index: 1; /* Ensure it stays on top */
-                        }
+                font-size: 36px;
+                color: #FFD700; 
+                transition: color 0.3s, transform 0.3s; /* Smooth transition for hover effects */
+                font-weight: bold; 
+                z-index: 1;
+            }
 
             .favorite-btn.favorited {
                 color: #FFD700; /* Gold color for favorites */
             }
 
             .favorite-btn:hover {
-                color: #FFD700; /* Gold color on hover */
+                background:  #022a6a;
             }
+
 
             /* Open Overlay Button */
                         .open-overlay-btn {
@@ -632,8 +644,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     grid-template-columns: 1fr;
                 }
             }
-
-            /* Ensure profile-select-btn occupies full space except favorite button */
             .profile-select-btn {
                 width: 100%;
                 height: 100%;
@@ -646,6 +656,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 font-size: 16px;
                 color: inherit;
                 font-weight: bold; /* Make text bold */
+            }
+
+            .profile-select-btn:hover {
+                background:  #022a6a;
             }
 
             .profile-select-btn:focus {
@@ -665,11 +679,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <a href="#" class="close-btn">&times;</a>
                 <h2>Activated Character Profiles</h2>
                 <i><p>Refresh page to see new characters.</p></i>
-
                 <!-- A-Z and Favorites Filter Buttons -->
                 <div class="filter-buttons">
                     <button class="filter-button" data-filter="all">All</button>
                     <button class="filter-button" data-filter="favorites">Favorites</button>
+                    <button class="filter-button" data-filter="latest">Newest</button>
                     <?php foreach (range('A', 'Z') as $letter): ?>
                         <button class="filter-button" data-filter="<?php echo $letter; ?>"><?php echo $letter; ?></button>
                     <?php endforeach; ?>
@@ -689,7 +703,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 // Determine if the profile is favorited
                                 $isFavorited = in_array($op['value'], $_SESSION['FAVORITES']);
                             ?>
-                            <div class="dropdown-option" data-filter-letter="<?php echo $isFavorited ? 'favorites' : $firstLetter; ?>">
+                            <div class="dropdown-option" 
+                                data-filter-letter="<?php echo $isFavorited ? 'favorites' : $firstLetter; ?>" 
+                                data-import-order="<?php echo $op['index']; ?>"> 
                                 <!-- Profile Selection Button -->
                                 <button type="submit" name="profileSelector" value="<?php echo $value; ?>" class="profile-select-btn" aria-label="Select profile <?php echo $name; ?>">
                                     <?php echo $name; ?>
@@ -734,7 +750,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 } else {
                                     container.style.display = 'none';
                                 }
-                            } else {
+                            } 
+                            // ADD THIS PART
+                            else if (filter === 'latest') {
+                                // Sort the .dropdown-option elements by data-import-order ASC
+                                const sortedContainers = Array.from(profileContainers).sort((a, b) => {
+                                    const aIndex = parseInt(a.getAttribute('data-import-order'), 10);
+                                    const bIndex = parseInt(b.getAttribute('data-import-order'), 10);
+                                    return aIndex - bIndex; // ascending
+                                });
+
+                                // Append them in the new order & show them, unless they start with '*'
+                                const parent = profileContainers[0].parentNode;
+                                sortedContainers.forEach(container => {
+                                    const profileText = container.textContent.trim(); // Get the text content of the profile
+                                    if (profileText.startsWith('*')) {
+                                        container.style.display = 'none'; // Hide profiles starting with '*'
+                                    } else {
+                                        container.style.display = 'block'; // Show other profiles
+                                        parent.appendChild(container);
+                                    }
+                                });
+                            }
+                            else {
                                 const containerLetter = container.getAttribute('data-filter-letter');
                                 if (containerLetter === filter) {
                                     container.style.display = 'block';
@@ -745,6 +783,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         });
                     });
                 });
+
 
                 // Optionally, activate 'All' filter by default
                 const allFilterBtn = document.querySelector('.filter-button[data-filter="all"]');
