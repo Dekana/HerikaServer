@@ -362,7 +362,35 @@ $query = "
 $existsColumn=$db->fetchAll($query);
 if (!$existsColumn[0]["column_name"]) {
     $db->execQuery(file_get_contents(__DIR__."/../data/npc_templates_trl_v1.sql"));
-    echo '<script>alert("A patch (pc_templates_trl) has been applied to Database")</script>';
+    echo '<script>alert("A patch (npc_templates_trl) has been applied to Database")</script>';
 }
+
+//database_versioning table
+$query = "
+    SELECT column_name 
+    FROM information_schema.columns 
+    WHERE table_name = 'database_versioning' AND column_name = 'version'
+";
+
+$existsColumn=$db->fetchAll($query);
+if (!$existsColumn[0]["column_name"]) {
+    $db->execQuery(file_get_contents(__DIR__."/../data/database_versioning.sql"));
+    echo '<script>alert("A patch (database versioning) has been applied to Database")</script>';
+}
+
+
+$query = "
+    SELECT version 
+    FROM database_versioning
+    WHERE tablename = 'npc_templates_trl'
+";
+
+$existsColumn=$db->fetchAll($query);
+
+if (!$existsColumn[0]["version"] || $existsColumn[0]["version"]<20250117001) {
+    $db->execQuery(file_get_contents(__DIR__."/../data/npc_templates_trl_es_v1.sql"));
+    echo '<script>alert("A patch (npc_templates_trl [es]) has been applied to Database")</script>';
+}
+
 
 ?>
