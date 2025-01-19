@@ -4,10 +4,10 @@
 /* Definitions and main includes */
 error_reporting(E_ALL);
 
-define("STOPALL_MAGIC_WORD", "/halt/i");
+@define("STOPALL_MAGIC_WORD", "/halt/i");
 
-define("MAXIMUM_SENTENCE_SIZE", 125);
-define("MINIMUM_SENTENCE_SIZE", 50);
+@define("MAXIMUM_SENTENCE_SIZE", 125);
+@define("MINIMUM_SENTENCE_SIZE", 50);
 
 date_default_timezone_set('Europe/Madrid');
 
@@ -700,7 +700,7 @@ if (!isset($GLOBALS["CURRENT_CONNECTOR"]) || (!file_exists(__DIR__.DIRECTORY_SEP
 
 } else {
 
-    require(__DIR__.DIRECTORY_SEPARATOR."connector".DIRECTORY_SEPARATOR."{$GLOBALS["CURRENT_CONNECTOR"]}.php");
+    require_once(__DIR__.DIRECTORY_SEPARATOR."connector".DIRECTORY_SEPARATOR."{$GLOBALS["CURRENT_CONNECTOR"]}.php");
 
     $connectionHandler=new connector();
     $connectionHandler->open($contextData,$overrideParameters);

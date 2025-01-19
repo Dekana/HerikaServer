@@ -731,10 +731,6 @@ function lastKeyWordsContext($n, $npcname='')
         
     }
 
-    function startsWithUppercase($string) {
-        return preg_match('/^[A-Z]/', $string);
-    }
-
     unset($words["Yeah"]);
     unset($words["Wouldn"]);
     unset($words["What"]);
@@ -804,10 +800,6 @@ function lastKeyWordsNew($n, $eventypes='')
             
         }
         
-    }
-
-    function startsWithUppercase($string) {
-        return preg_match('/^[A-Z]/', $string);
     }
 
     unset($words["Yeah"]);
@@ -1159,10 +1151,6 @@ function ExtractKeywords($sourceText) {
         
     }
 
-    function startsWithUppercase($string) {
-        return preg_match('/^[A-Z]/', $string);
-    }
-
     unset($words["Yeah"]);
     unset($words["Wouldn"]);
     unset($words["What"]);
@@ -1427,5 +1415,9 @@ function prettyPrintJson($json )
     }
 
     return $result;
+}
+
+function startsWithUppercase($string) {
+    return preg_match('/^[A-Z]/', $string);
 }
 

@@ -53,7 +53,7 @@ if ($GLOBALS["MINIME_T5"]) {
 
                     
             // Helper function to convert a string to tsquery format
-            function prepareTsQuery($string, $operator = '|') {
+            $prepareTsQuery = function ($string, $operator = '|') {
                 // Remove all non-alphanumeric characters except spaces
                 $cleanedString = preg_replace('/[^a-zA-Z0-9\s]/', '', $string);
                 // Split words by whitespace
@@ -62,13 +62,13 @@ if ($GLOBALS["MINIME_T5"]) {
                 $words = array_filter($words);
                 // Join words with the specified operator
                 return implode(" $operator ", $words);
-            }
+            };
             
             // Prepare tsquery strings
-            $currentInputTopicQuery = prepareTsQuery($currentInputTopic);
-            $currentOghmaTopicQuery = prepareTsQuery($currentOghmaTopic);
-            $locationCtxQuery = prepareTsQuery($locationCtx);
-            $contextKeywordsQuery = prepareTsQuery($contextKeywords);
+            $currentInputTopicQuery = $prepareTsQuery($currentInputTopic);
+            $currentOghmaTopicQuery = $prepareTsQuery($currentOghmaTopic);
+            $locationCtxQuery = $prepareTsQuery($locationCtx);
+            $contextKeywordsQuery = $prepareTsQuery($contextKeywords);
             
             // Build the query
             $query = "
