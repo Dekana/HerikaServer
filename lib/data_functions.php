@@ -626,7 +626,13 @@ function DataLastDataExpandedFor($actor, $lastNelements = -10,$sqlfilter="")
 
     //}
 
-    $lastDialogFull[] = array('role' => $lastSpeaker, 'content' => implode("\n", $buffer));
+    // avoid creating empty content entry if no dialogue was found
+    if (sizeof($buffer) > 0) {
+        $lastDialogFull[] = array('role' => $lastSpeaker, 'content' => implode("\n", $buffer));
+    }
+    if (sizeof($lastDialogFull) === 0) {
+        return [];
+    }
     
     // Compact Herika's lines
     $lastrole="";
@@ -663,7 +669,11 @@ function DataLastDataExpandedFor($actor, $lastNelements = -10,$sqlfilter="")
         
         $lastrole=$line["role"];
     }
-    
+
+    if ($bufferHerika) {
+        $lastDialogFullCopy[] = ["role"=>"assistant","content"=>$bufferHerika];
+    }
+
     $lastDialogFull=$lastDialogFullCopy;
 
     // Replace player for user.
@@ -1251,7 +1261,7 @@ function DataRechatHistory()
 
  function extractDialogueTarget($string) {
         // Check if the string contains "(talking to"
-        if (strpos($string, '(talking to') !== false) {
+        if ($string && strpos($string, '(talking to') !== false) {
             // Extract the target's name using regular expression
             preg_match('/\(talking to ([^\)]+)\)/', $string, $matches);
             
