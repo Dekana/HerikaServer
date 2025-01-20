@@ -392,5 +392,10 @@ if (!$existsColumn[0]["version"] || $existsColumn[0]["version"]<20250117001) {
     echo '<script>alert("A patch (npc_templates_trl [es]) has been applied to Database")</script>';
 }
 
+if (!$existsColumn[0]["version"] || $existsColumn[0]["version"]<20250120001) {
+    $db->execQuery(file_get_contents(__DIR__."/../data/npc_templates_trl_es_v2.sql"));
+    echo '<script>alert("A patch (npc_templates_trl [es]) has been applied to Database")</script>';
+}
+
 
 ?>
