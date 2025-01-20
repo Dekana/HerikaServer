@@ -667,16 +667,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             .icon-link {
-            display: inline-block; /* Makes it behave like a button */
-            color: white; /* Button text color */
-            background-color: red; /* Button background color */
-            text-align: center; /* Center-align text */
-            border: none; /* Remove any borders */
-            border-radius: 5px; /* Rounded corners */
-            text-decoration: none; /* Remove underline */
-            font-size: 16px; /* Adjust text size */
-            cursor: pointer; /* Change cursor to pointer on hover */
-            transition: background-color 0.3s ease; /* Smooth hover effect */
+                display: inline-flex;           /* Use flex to center content both vertically and horizontally */
+                align-items: center;           /* Vertical centering */
+                justify-content: center;       /* Horizontal centering */
+                width: 80px;                   /* Fixed width */
+                height: 40px;                  /* Fixed height */
+                background-color: red;         /* Button background color */
+                color: white;                  /* Button text/icon color */
+                text-decoration: none;         /* Remove underline */
+                border: none;                  /* No border */
+                border-radius: 5px;           /* Rounded corners */
+                font-size: 16px;               /* Icon/text size */
+                cursor: pointer;               /* Pointer on hover */
+                transition: background-color 0.3s ease; /* Smooth hover effect */
             }
 
             .icon-link:hover {
