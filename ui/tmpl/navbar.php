@@ -35,7 +35,7 @@
                 <!-- Logs Category -->
                 <li><h6 class="dropdown-header">Logs</h6></li>
                 <li>
-                    <a class="dropdown-item" href="index.php?table=log">AI Log</a>
+                    <a class="dropdown-item" href="index.php?table=log">Response Log</a>
                 </li>
                 <li>
                     <a class="dropdown-item" href="index.php?table=diarylog">Diary Log</a>
@@ -664,6 +664,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             .profile-select-btn:focus {
                 outline: none;
+            }
+
+            .icon-link {
+            display: inline-block; /* Makes it behave like a button */
+            color: white; /* Button text color */
+            background-color: red; /* Button background color */
+            text-align: center; /* Center-align text */
+            border: none; /* Remove any borders */
+            border-radius: 5px; /* Rounded corners */
+            text-decoration: none; /* Remove underline */
+            font-size: 16px; /* Adjust text size */
+            cursor: pointer; /* Change cursor to pointer on hover */
+            transition: background-color 0.3s ease; /* Smooth hover effect */
+            }
+
+            .icon-link:hover {
+            background-color: darkred; /* Darken background on hover */
             }
         </style>
     </head>
