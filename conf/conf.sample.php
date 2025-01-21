@@ -241,6 +241,12 @@ $TTS["COQUI_AI"]["speed"]=1; //Speech rate.
 $TTS["COQUI_AI"]["language"]='en'; //Language.
 $TTS["COQUI_AI"]["API_KEY"]='';	//Coqui.ai API key.
 
+// KOKORO
+
+$TTS["KOKORO"]["endpoint"]='http://127.0.0.1:8880'; //API endpoint.
+$TTS["KOKORO"]["voiceid"]='af_bella'; //Voice ID.
+$TTS["KOKORO"]["speed"]=1.0; //Speech speed.
+
 //[Player TTS]
 $TTSFUNCTION_PLAYER="none";
 $TTSFUNCTION_PLAYER_VOICE="malenord";

@@ -150,7 +150,7 @@
       "template": {"type":"select","values":["vicuna-1","vicuna-1.1","alpaca","synthia","extended-alpaca","superHOT","chatml","chatml-c","zephyr","openchat","dreamgen","neuralchat","phi","llama3","gromenauer","gemma2","mistral-ins"],"description":"Prompt Format. Specified in the HuggingFace model card"}
     }
   },
-  "TTSFUNCTION": {"type":"select","values":["none","melotts","xtts-fastapi","mimic3","xvasynth","azure","11labs","gcp","openai","convai"],"description":"Text-to-Speech service options. Used to generate AI NPC voice.","_title":"Text-to-Speech Service"},
+  "TTSFUNCTION": {"type":"select","values":["none","melotts","xtts-fastapi","mimic3","xvasynth","azure","11labs","gcp","openai","convai","kokoro"],"description":"Text-to-Speech service options. Used to generate AI NPC voice.","_title":"Text-to-Speech Service"},
   "TTS": {
     "_title":"Text-to-Speech Service",
     "MELOTTS": {
@@ -227,6 +227,12 @@
       "language":{"type":"select","values":["ar", "cmn-CN", "de-DE", "en-US", "es-ES", "es-MX", "es-US", "fr-FR", "hi-IN", "it-IT", "js-JP", "kk-KZ", "ko-KR", "nl-BE", "nl-NL", "pl-PL", "pt-BR", "pt-PT", "ru-RU", "sv-SE", "tr-TR", "vi-VN", "yue-HK", "zh-HK"],"description":"Language","helpurl":"https://platform.openai.com/docs/guides/text-to-speech"},
       "voiceid":{"type":"string","description":"Voice id (check compatability with language)","helpurl":"https://docs.convai.com/api-docs/reference/core-api-reference/standalone-voice-api/text-to-speech-api"},
       "description":"VoiceId","helpurl":"https://docs.convai.com/api-docs/reference/core-api-reference/standalone-voice-api/text-to-speech-api"
+      },
+    "KOKORO": {
+      "_title":"KOKORO 82M",
+      "endpoint":{"type":"url","description":"End point URL","helpurl":""},
+      "voiceid":{"type":"string","description":"Voice id (check compatability with language)","helpurl":""},
+      "speed":{"type":"number","description":"Speed"}
       }
   },
   "TTSFUNCTION_PLAYER": {"type":"select","userlvl":"basic","scope":"global","values":["none","melotts","xtts-fastapi","xvasynth","mimic3","azure","11labs","gcp","openai","convai"],"description":"Text-to-Speech service options. Used to generate your voice. Currently bugged for xVASynth.","_title":"Player TTS"},
