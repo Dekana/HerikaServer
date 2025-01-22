@@ -480,7 +480,11 @@ function returnLines($lines,$writeOutput=true)
                 require_once(__DIR__."/../tts/tts-stylettsv2-2.php");
                 $ttsOutput=$GLOBALS["TTS_IN_USE"]($responseTextUnmooded, $mood, $responseText);
 
-            } else {
+            } else if ($GLOBALS["TTSFUNCTION"] == "koboldcpp") {
+                require_once(__DIR__."/../tts/tts-koboldcpp.php");
+                $ttsOutput=$GLOBALS["TTS_IN_USE"]($responseTextUnmooded, $mood, $responseText);
+            } 
+            else {
                 if (file_exists(__DIR__."/../tts/tts-".$GLOBALS["TTSFUNCTION"].".php")) {
                     require_once(__DIR__."/../tts/tts-".$GLOBALS["TTSFUNCTION"].".php");
                     $ttsOutput=$GLOBALS["TTS_IN_USE"]($responseTextUnmooded, $mood, $responseText);
