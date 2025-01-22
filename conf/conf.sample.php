@@ -240,6 +240,9 @@ $TTS["COQUI_AI"]["voice_id"]='f05c5b91-7540-4b26-b534-e820d43065d1'; //Voice ID.
 $TTS["COQUI_AI"]["speed"]=1; //Speech rate.
 $TTS["COQUI_AI"]["language"]='en'; //Language.
 $TTS["COQUI_AI"]["API_KEY"]='';	//Coqui.ai API key.
+//KoboldCPP TTS
+$TTS["koboldcpp"]["endpoint"]='http://127.0.0.1:5001/api/extra/tts'; //API endpoint.
+$TTS["koboldcpp"]["voice"]='kobo';
 
 // KOKORO
 
