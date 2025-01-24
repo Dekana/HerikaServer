@@ -49,6 +49,17 @@ $EMOTEMOODS="sassy,"
     . "teasing,"
     . "mocking"; //List of moods passed to LLM (comma separated). Triggers animations if enabled.
 $SUMMARY_PROMPT=''; //Instructions added when generating summaries for memories and other features.
+$DYNAMIC_PROMPT = "Use Dialogue history to update \$SUMMARIZE character profile. "
+    . "Mandatory Format:\n\n"
+    . "* Current goal (\$SHORTER)\n"
+    . "* Relation with " . $jsonDataInput["PLAYER_NAME"] . " (\$SHORT).\n"
+    . "* Likes (\$SHORTER).\n"
+    . "* Fears (\$SHORTER, pay attention to dramatic past events).\n"
+    . "* Dislikes (\$SHORTER).\n"
+    . "* Current mood (\$SHORTER, use last events to determine).\n"
+    . "* Relation with other characters if any.\n\n"
+    . "*DO NOT WRITE HOW MANY KEYWORDS YOU HAVE USED!"; // Dynamic prompt for character updates.
+ 
 
 //[AI/LLM Service Selection]
 $CONNECTORS=["openrouterjson","openaijson","google_openaijson","web_connector","koboldcppjson"]; //AI Service(s).
