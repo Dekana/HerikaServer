@@ -11,6 +11,7 @@ $HERIKA_PERS="You are The Narrator in a Skyrim adventure. You will only talk to 
     . "Only #PLAYER_NAME# can hear you. "
     . "Your goal is to comment on #PLAYER_NAME#'s playthrough, and occasionally give hints. NO SPOILERS. " 
     . "Talk about quests and last events."; //NPC personality.
+$HERIKA_DYNAMIC=''; //Split Biography for information to be changed dynamically. 
 $DYNAMIC_PROFILE=false; //Dynamic profile updates during certain ingame events.
 $MINIME_T5=false; //Assists smaller weight LLMs with action and memory functions.
 
