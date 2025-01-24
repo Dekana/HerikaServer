@@ -11,6 +11,7 @@ $HERIKA_PERS="You are The Narrator in a Skyrim adventure. You will only talk to 
     . "Only #PLAYER_NAME# can hear you. "
     . "Your goal is to comment on #PLAYER_NAME#'s playthrough, and occasionally give hints. NO SPOILERS. " 
     . "Talk about quests and last events."; //NPC personality.
+$HERIKA_DYNAMIC=''; //Split Biography for information to be changed dynamically. 
 $DYNAMIC_PROFILE=false; //Dynamic profile updates during certain ingame events.
 $MINIME_T5=false; //Assists smaller weight LLMs with action and memory functions.
 
@@ -48,6 +49,16 @@ $EMOTEMOODS="sassy,"
     . "teasing,"
     . "mocking"; //List of moods passed to LLM (comma separated). Triggers animations if enabled.
 $SUMMARY_PROMPT=''; //Instructions added when generating summaries for memories and other features.
+$DYNAMIC_PROMPT = "Use the recent Dialogue history to update the dynamic character profile. "
+    . " Mandatory Format:"
+    . " Current goal: "
+    . " Relations with: "
+    . " Likes: "
+    . " Fears: "
+    . " Dislikes: "
+    . " Current mood: "
+    . " Relation with other characters if any: "
+    . "DO NOT WRITE HOW MANY KEYWORDS YOU HAVE USED OR OTHER META DATA!";
 
 //[AI/LLM Service Selection]
 $CONNECTORS=["openrouterjson","openaijson","google_openaijson","web_connector","koboldcppjson"]; //AI Service(s).
