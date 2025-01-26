@@ -11,6 +11,7 @@ $HERIKA_PERS="You are The Narrator in a Skyrim adventure. You will only talk to 
     . "Only #PLAYER_NAME# can hear you. "
     . "Your goal is to comment on #PLAYER_NAME#'s playthrough, and occasionally give hints. NO SPOILERS. " 
     . "Talk about quests and last events."; //NPC personality.
+$HERIKA_DYNAMIC=''; //Split Biography for information to be changed dynamically. 
 $DYNAMIC_PROFILE=false; //Dynamic profile updates during certain ingame events.
 $MINIME_T5=false; //Assists smaller weight LLMs with action and memory functions.
 
@@ -48,6 +49,16 @@ $EMOTEMOODS="sassy,"
     . "teasing,"
     . "mocking"; //List of moods passed to LLM (comma separated). Triggers animations if enabled.
 $SUMMARY_PROMPT=''; //Instructions added when generating summaries for memories and other features.
+$DYNAMIC_PROMPT = "Use the recent Dialogue history to update the dynamic character profile. "
+    . " Mandatory Format:"
+    . " Current goal: "
+    . " Relations with: "
+    . " Likes: "
+    . " Fears: "
+    . " Dislikes: "
+    . " Current mood: "
+    . " Relation with other characters if any: "
+    . "DO NOT WRITE HOW MANY KEYWORDS YOU HAVE USED OR OTHER META DATA!";
 
 //[AI/LLM Service Selection]
 $CONNECTORS=["openrouterjson","openaijson","google_openaijson","web_connector","koboldcppjson"]; //AI Service(s).
@@ -177,6 +188,7 @@ $TTS["MELOTTS"]["voiceid"]='malenord'; //Voice ID.
 $TTS["XTTSFASTAPI"]["endpoint"]='http://127.0.0.1:8020'; //API endpoint.
 $TTS["XTTSFASTAPI"]["language"]='en'; //Lanuguage.
 $TTS["XTTSFASTAPI"]["voiceid"]='TheNarrator'; //Generated voice file name.
+$TTS["XTTSFASTAPI"]["voicelogic"]='name';
 //MIMIC3
 $TTS["MIMIC3"]["URL"]="http://127.0.0.1:59125"; //API endpoint. 
 $TTS["MIMIC3"]["voice"]="en_UK/apope_low#default"; //Voice ID.
@@ -240,6 +252,15 @@ $TTS["COQUI_AI"]["voice_id"]='f05c5b91-7540-4b26-b534-e820d43065d1'; //Voice ID.
 $TTS["COQUI_AI"]["speed"]=1; //Speech rate.
 $TTS["COQUI_AI"]["language"]='en'; //Language.
 $TTS["COQUI_AI"]["API_KEY"]='';	//Coqui.ai API key.
+//KoboldCPP TTS
+$TTS["koboldcpp"]["endpoint"]='http://127.0.0.1:5001/api/extra/tts'; //API endpoint.
+$TTS["koboldcpp"]["voice"]='kobo';
+
+// KOKORO
+
+$TTS["KOKORO"]["endpoint"]='http://127.0.0.1:8880'; //API endpoint.
+$TTS["KOKORO"]["voiceid"]='af_bella'; //Voice ID.
+$TTS["KOKORO"]["speed"]=1.0; //Speech speed.
 
 //[Player TTS]
 $TTSFUNCTION_PLAYER="none";

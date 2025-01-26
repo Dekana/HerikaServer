@@ -493,39 +493,17 @@ if ($gameRequest[0] == "init") { // Reset responses if init sent (Think about th
         $partyConf=DataGetCurrentPartyConf();
 		$partyConfA=json_decode($partyConf,true);
 		error_log($partyConf);
-		if (isset($partyConfA["{$GLOBALS["HERIKA_NAME"]}"])) {
-			$charDesc=print_r($partyConfA["{$GLOBALS["HERIKA_NAME"]}"],true).PHP_EOL.$GLOBALS["HERIKA_PERS"];
-			$currentProfile=$charDesc;
-		} else
-            $currentProfile=$GLOBALS["HERIKA_PERS"];
+		// Use the global DYNAMIC_PROMPT
+        $updateProfilePrompt = $GLOBALS["DYNAMIC_PROMPT"];
 
-        $updateProfilePrompt = "Use Dialogue history to update and summarize character profile. 
-Mandatory Format:
-
-* Personality,(concise description, 75 words).
-* Bio: (birthplace, gender, race $SHORTER).
-* Speech style (15 keywords).
-* Current goal (15 keywords).
-* Relation with {$GLOBALS["PLAYER_NAME"]} (75 words).
-* Likes (15 keywords).
-* Fears 15 keywords, pay atention to dramatic past events).
-* Dislikes (15 keywords).
-* Current mood (15 keywords, use last events to determine). 
-* Relation with other followers if any.
-
-Profile must start with the title: 'Roleplay as {$GLOBALS["HERIKA_NAME"]}'.";
-        if(isset($GLOBALS["UPDATE_PERSONALITY_PROMPT"])) {
-            $updateProfilePrompt = $GLOBALS["UPDATE_PERSONALITY_PROMPT"];
-        }
-
-		$head[]   = ["role"	=> "system", "content"	=> "You are an assistant. Will analyze a dialogue and then you will update a character profile based on that dialogue. ", ];
+		$head[]   = ["role"	=> "system", "content"	=> "You are an assistant. Analyze this dialogue and then update the dynamic character profile based on the information provided. ", ];
 		$prompt[] = ["role"	=> "user", "content"	=> "* Dialogue history:\n" .$historyData ];
-		$prompt[] = ["role"	=> "user", "content"	=> "Current character profile, for reference.:\n$currentProfile", ];
+		$prompt[] = ["role" => "user", "content" => "Current character profile you are updating:\n" . "Character name:\n"  . $jsonDataInput["HERIKA_NAME"] . "Character static biography:\n" . $jsonDataInput["HERIKA_PERS"] . "\n" ."Character dynamic biography (this is what you are updating):\n" . $jsonDataInput["HERIKA_DYNAMIC"]];
 		$prompt[] = ["role"=> "user", "content"	=> $updateProfilePrompt, ];
 		$contextData       = array_merge($head, $prompt);
 		$connectionHandler = new connector();
-        
-		$connectionHandler->open($contextData, ["max_tokens"=>500]);
+        $GLOBALS["FORCE_MAX_TOKENS"]=1500;
+		$connectionHandler->open($contextData, ["max_tokens"=>1500]);
 		$buffer      = "";
 		$totalBuffer = "";
 		$breakFlag   = false;
@@ -550,7 +528,7 @@ Profile must start with the title: 'Roleplay as {$GLOBALS["HERIKA_NAME"]}'.";
 		$actions = $connectionHandler->processActions();
 		
 		
-		$responseParsed["HERIKA_PERS"]=$buffer;
+		$responseParsed["HERIKA_DYNAMIC"]=$buffer;
         
         $newConfFile=$_GET["profile"];
 
@@ -593,17 +571,17 @@ Profile must start with the title: 'Roleplay as {$GLOBALS["HERIKA_NAME"]}'.";
             }
 
             if(array_key_exists("CustomUpdateProfileFunction", $GLOBALS) && is_callable($GLOBALS["CustomUpdateProfileFunction"])) {
-                $responseParsed["HERIKA_PERS"] = $GLOBALS["CustomUpdateProfileFunction"]($buffer);
+                $responseParsed["HERIKA_DYNAMIC"] = $GLOBALS["CustomUpdateProfileFunction"]($buffer);
             }
 
             file_put_contents($newFile, implode('', $file_lines));
-            file_put_contents($newFile, PHP_EOL.'$HERIKA_PERS=\''.addslashes($responseParsed["HERIKA_PERS"]).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
+            file_put_contents($newFile, PHP_EOL.'$HERIKA_DYNAMIC=\''.addslashes($responseParsed["HERIKA_DYNAMIC"]).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
             file_put_contents($newFile, '?>'.PHP_EOL, FILE_APPEND | LOCK_EX);
             
         }
     
         //print_r($contextData);
-        //print_r($responseParsed["HERIKA_PERS"]);
+        //print_r($responseParsed["HERIKA_DYNAMIC"]);
         $MUST_END=true;
     
     }
