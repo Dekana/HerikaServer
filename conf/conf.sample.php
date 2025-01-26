@@ -48,7 +48,7 @@ $EMOTEMOODS="sassy,"
     . "neutral,"
     . "teasing,"
     . "mocking"; //List of moods passed to LLM (comma separated). Triggers animations if enabled.
-$SUMMARY_PROMPT=''; //Instructions added when generating summaries for memories and other features.
+$SUMMARY_PROMPT= 'Focus on key events, tagging characters, locations, and factions accurately. Ensure memories align and maintain chronological order while foreshadowing future arcs. Prioritize player agency, and use environmental cues to enhance storytelling and continuity.'; 
 $DYNAMIC_PROMPT = "Use the recent Dialogue history to update the dynamic character profile. "
     . " Mandatory Format:"
     . " Current goal: "
