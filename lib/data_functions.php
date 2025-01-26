@@ -1849,13 +1849,49 @@ function createProfile($npcname,$FORCE_PARMS=[],$overwrite=false) {
 
         $voicelogic = $GLOBALS["TTS"]["XTTSFASTAPI"]["voicelogic"];
 
+
+        // 1. Save the file lines
         file_put_contents($newFile, implode('', $file_lines));
+        // 2. Save the original $npcname to HERIKA_NAME
         file_put_contents($newFile, '$HERIKA_NAME=\''.addslashes(trim($npcname)).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
-    
-        if (isset($npcTemlate[0]) && is_array($npcTemlate[0]))
+        
+
+        // 3. Extract the bracketed portion and convert it to the "stripped" version
+        //    e.g. Bofesar [Whiterun Guard] -> whiterun_guard
+        $bracketMatch = '';
+        if (preg_match('/\[(.*?)\]/', $npcname, $matches)) {
+            $bracketMatch = trim($matches[1]);    // remove possible extra spaces
+            $bracketMatch = strtolower($bracketMatch);
+            $bracketMatch = str_replace(' ', '_', $bracketMatch);
+        }
+        
+        // Original logic for pulling from database
+        if (isset($npcTemlate[0]) && is_array($npcTemlate[0])) {
+
             file_put_contents($newFile, '$HERIKA_PERS=\''.addslashes(trim($npcTemlate[0]["npc_pers"])).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
-        else
-            file_put_contents($newFile, '$HERIKA_PERS=\'Roleplay as '.addslashes(trim($npcname)).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
+
+        } elseif (!empty($bracketMatch)) {
+            // 4. Query #2: Try bracket-stripped match only if Query #1 was empty
+            $npcTemlate2 = $db->fetchAll("SELECT npc_pers 
+                                        FROM combined_npc_templates
+                                        WHERE npc_name='{$bracketMatch}'");
+
+            if (!empty($npcTemlate2[0])) {
+                // Found a row by bracket match
+                file_put_contents($newFile,'$HERIKA_PERS=\''.addslashes(trim($npcTemlate2[0]["npc_pers"])).'\';'.PHP_EOL,FILE_APPEND | LOCK_EX);
+            } else {
+                // 5. Fallback if neither query found anything
+                file_put_contents($newFile,'$HERIKA_PERS=\'Roleplay as '.addslashes($npcname).'\';'.PHP_EOL,FILE_APPEND | LOCK_EX);
+            }
+            
+        } else {
+            // 5. Fallback if no bracket or no match found
+            file_put_contents(
+                $newFile,
+                '$HERIKA_PERS=\'Roleplay as '.addslashes($npcname).'\';'.PHP_EOL,
+                FILE_APPEND | LOCK_EX
+            );
+        }
 
             
         foreach ($FORCE_PARMS as $p=>$v) {
