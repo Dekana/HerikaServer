@@ -1795,7 +1795,7 @@ function profile_exists($npcname) {
 }
 
 function createProfile($npcname,$FORCE_PARMS=[],$overwrite=false) {
-
+    sleep (3);
     global $db; 
 
     if ($npcname=="The Narrator")   // Refuse to add Narrator
