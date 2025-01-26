@@ -1869,7 +1869,8 @@ function createProfile($npcname,$FORCE_PARMS=[],$overwrite=false) {
         if (isset($npcTemlate[0]) && is_array($npcTemlate[0])) {
 
             file_put_contents($newFile, '$HERIKA_PERS=\''.addslashes(trim($npcTemlate[0]["npc_pers"])).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
-
+        
+            // RealNamesExtended support for generic npcs
         } elseif (!empty($bracketMatch)) {
             // 4. Query #2: Try bracket-stripped match only if Query #1 was empty
             $npcTemlate2 = $db->fetchAll("SELECT npc_pers 
@@ -1879,18 +1880,20 @@ function createProfile($npcname,$FORCE_PARMS=[],$overwrite=false) {
             if (!empty($npcTemlate2[0])) {
                 // Found a row by bracket match
                 file_put_contents($newFile,'$HERIKA_PERS=\''.addslashes(trim($npcTemlate2[0]["npc_pers"])).'\';'.PHP_EOL,FILE_APPEND | LOCK_EX);
+                $dynamicPrompts = include 'prompts/dynamic_prompts.php'; // Ensure this returns an array
+                file_put_contents($newFile, '$HERIKA_DYNAMIC=\''.addslashes(trim($dynamicPrompts[array_rand($dynamicPrompts)])).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
+
             } else {
-                // 5. Fallback if neither query found anything
+                // Fallback if neither query found anything
                 file_put_contents($newFile,'$HERIKA_PERS=\'Roleplay as '.addslashes($npcname).'\';'.PHP_EOL,FILE_APPEND | LOCK_EX);
+                $dynamicPrompts = include 'prompts/dynamic_prompts.php'; // Ensure this returns an array
+                file_put_contents($newFile, '$HERIKA_DYNAMIC=\''.addslashes(trim($dynamicPrompts[array_rand($dynamicPrompts)])).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
+
             }
-            
+
         } else {
             // 5. Fallback if no bracket or no match found
-            file_put_contents(
-                $newFile,
-                '$HERIKA_PERS=\'Roleplay as '.addslashes($npcname).'\';'.PHP_EOL,
-                FILE_APPEND | LOCK_EX
-            );
+            file_put_contents($newFile,'$HERIKA_PERS=\'Roleplay as '.addslashes($npcname).'\';'.PHP_EOL,FILE_APPEND | LOCK_EX);
         }
 
             
