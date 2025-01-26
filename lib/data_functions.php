@@ -1846,26 +1846,23 @@ function createProfile($npcname,$FORCE_PARMS=[],$overwrite=false) {
             }
         }
         
-        // Consider adding here notes like 'They Just met' into profile.
-        
+
+        $voicelogic = $GLOBALS["TTS"]["XTTSFASTAPI"]["voicelogic"];
 
         file_put_contents($newFile, implode('', $file_lines));
-        file_put_contents($newFile, '$TTS["XTTSFASTAPI"]["voiceid"]=\''.$codename.'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
-        file_put_contents($newFile, '$TTS["MELOTTS"]["voiceid"]=\''.strtolower($voicetype[3]).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
-        file_put_contents($newFile, '$TTS["XVASYNTH"]["model"]=\'sk_' . strtolower(str_replace(['maleunique', 'femaleunique'], '', $voicetype[3])) . '\';' . PHP_EOL, FILE_APPEND | LOCK_EX);
         file_put_contents($newFile, '$HERIKA_NAME=\''.addslashes(trim($npcname)).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
-        
+    
         if (isset($npcTemlate[0]) && is_array($npcTemlate[0]))
             file_put_contents($newFile, '$HERIKA_PERS=\''.addslashes(trim($npcTemlate[0]["npc_pers"])).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
         else
             file_put_contents($newFile, '$HERIKA_PERS=\'Roleplay as '.addslashes(trim($npcname)).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
 
+            
         foreach ($FORCE_PARMS as $p=>$v) {
             file_put_contents($newFile, '$'.$p.'=\''.addslashes($v).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
         }
 
-        /* New voice logic */
-
+        // XTTS voiceid override from table. if fails then xtts voicelogic pick
         if (!empty($xttsid[0]['xtts_voiceid'])) {
             file_put_contents(
                 $newFile,
@@ -1873,37 +1870,29 @@ function createProfile($npcname,$FORCE_PARMS=[],$overwrite=false) {
                 FILE_APPEND | LOCK_EX
             );
         } else {
-            //original logic
-            file_put_contents(
-                $newFile,
-                '$TTS["XTTSFASTAPI"]["voiceid"]=\'' . $codename . '\';' . PHP_EOL,
-                FILE_APPEND | LOCK_EX
-            );
+            if ($voicelogic === "voicetype") {
+                file_put_contents($newFile, '$TTS["XTTSFASTAPI"]["voiceid"]=\'' . strtolower($voicetype[3]) . '\';' . PHP_EOL, FILE_APPEND | LOCK_EX);
+            } else {
+                file_put_contents($newFile, '$TTS["XTTSFASTAPI"]["voiceid"]=\'' . $codename . '\';' . PHP_EOL, flags: FILE_APPEND | LOCK_EX);
+            }
         }
-
-        // Check if melotts_voiceid exists and is not null
+        // MeloTTS voiceid override from table, if fails then generated normally.
         if (!empty($melottsid[0]['melotts_voiceid'])) {
             // Use the melotts_voiceid value
-            file_put_contents(
-                $newFile,
-                '$TTS["MELOTTS"]["voiceid"]=\'' . strtolower($melottsid[0]['melotts_voiceid']) . '\';' . PHP_EOL,
-                FILE_APPEND | LOCK_EX
-            );
+            file_put_contents($newFile,'$TTS["MELOTTS"]["voiceid"]=\'' . strtolower($melottsid[0]['melotts_voiceid']) . '\';' . PHP_EOL,FILE_APPEND | LOCK_EX);
         } else {
-            // original logic
-            file_put_contents(
-                $newFile,
-                '$TTS["MELOTTS"]["voiceid"]=\'' . strtolower($voicetype[3]) . '\';' . PHP_EOL,
-                FILE_APPEND | LOCK_EX
-            );
+            file_put_contents($newFile, '$TTS["MELOTTS"]["voiceid"]=\''.strtolower($voicetype[3]).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
         }
 
         //xvansynth logic from override table
-        file_put_contents(
-            $newFile,
-            '$TTS["XVASYNTH"]["model"]=\'' . strtolower($xvasnythid[0]['xvasynth_voiceid']) . '\';' . PHP_EOL,
-            FILE_APPEND | LOCK_EX
-        );
+        if (!empty($xvasynthid[0]['xvasynth_voiceid'])) {
+
+            file_put_contents($newFile,'$TTS["XVASYNTH"]["model"]=\'' . strtolower($xvasnythid[0]['xvasynth_voiceid']) . '\';' . PHP_EOL,FILE_APPEND | LOCK_EX);
+        }
+        else {
+            file_put_contents($newFile, '$TTS["XVASYNTH"]["model"]=\'sk_' . strtolower($voicetype[3]).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
+        }
+
 
         file_put_contents($newFile, '?>'.PHP_EOL, FILE_APPEND | LOCK_EX);
 
