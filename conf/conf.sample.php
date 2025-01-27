@@ -61,7 +61,7 @@ $DYNAMIC_PROMPT = "Use the recent Dialogue history to update the dynamic charact
     . "DO NOT WRITE HOW MANY KEYWORDS YOU HAVE USED OR OTHER META DATA!";
 
 //[AI/LLM Service Selection]
-$CONNECTORS=["openrouterjson","openaijson","google_openaijson","web_connector","koboldcppjson"]; //AI Service(s).
+$CONNECTORS=["openrouterjson","openaijson","koboldcppjson"]; //AI Service(s).
 $CONNECTORS_DIARY=["openrouter","openai","google_openaijson","koboldcpp"]; //Creates diary entries and memories.
 
 //[AI/LLM Connectors]
