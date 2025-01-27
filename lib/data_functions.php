@@ -1796,7 +1796,7 @@ function profile_exists($npcname) {
 }
 
 function createProfile($npcname,$FORCE_PARMS=[],$overwrite=false) {
-
+    sleep (3);
     global $db; 
 
     if ($npcname=="The Narrator")   // Refuse to add Narrator
@@ -1847,26 +1847,69 @@ function createProfile($npcname,$FORCE_PARMS=[],$overwrite=false) {
             }
         }
         
-        // Consider adding here notes like 'They Just met' into profile.
-        
 
+        $voicelogic = $GLOBALS["TTS"]["XTTSFASTAPI"]["voicelogic"];
+        //use the Nametype conf opts to latch onto the character name while still being able to pull the correct voicetype[3]
+        if ($voicelogic === "voicetype") {
+            $codename = npcNameToCodename($npcname);
+            $cn=$db->escape("Nametype/$codename");
+            $vtype=$db->fetchAll("select value from conf_opts where id='$cn'");
+            $voicetypeString=(isOk($vtype))?$vtype[0]["value"]:null;
+            $voicetype=explode("\\",$voicetypeString);
+        }
+
+        // 1. Save the file lines
         file_put_contents($newFile, implode('', $file_lines));
-        file_put_contents($newFile, '$TTS["XTTSFASTAPI"]["voiceid"]=\''.$codename.'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
-        file_put_contents($newFile, '$TTS["MELOTTS"]["voiceid"]=\''.strtolower($voicetype[3]).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
-        file_put_contents($newFile, '$TTS["XVASYNTH"]["model"]=\'sk_' . strtolower(str_replace(['maleunique', 'femaleunique'], '', $voicetype[3])) . '\';' . PHP_EOL, FILE_APPEND | LOCK_EX);
+        // 2. Save the original $npcname to HERIKA_NAME
         file_put_contents($newFile, '$HERIKA_NAME=\''.addslashes(trim($npcname)).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
         
-        if (isset($npcTemlate[0]) && is_array($npcTemlate[0]))
-            file_put_contents($newFile, '$HERIKA_PERS=\''.addslashes(trim($npcTemlate[0]["npc_pers"])).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
-        else
-            file_put_contents($newFile, '$HERIKA_PERS=\'Roleplay as '.addslashes(trim($npcname)).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
 
+        // 3. Extract the bracketed portion and convert it to the "stripped" version
+        //    e.g. Bofesar [Whiterun Guard] -> whiterun_guard
+        $bracketMatch = '';
+        if (preg_match('/\[(.*?)\]/', $npcname, $matches)) {
+            $bracketMatch = trim($matches[1]);    // remove possible extra spaces
+            $bracketMatch = strtolower($bracketMatch);
+            $bracketMatch = str_replace(' ', '_', $bracketMatch);
+        }
+        
+        // Original logic for pulling from database
+        if (isset($npcTemlate[0]) && is_array($npcTemlate[0])) {
+
+            file_put_contents($newFile, '$HERIKA_PERS=\''.addslashes(trim($npcTemlate[0]["npc_pers"])).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
+        
+            // RealNamesExtended support for generic npcs
+        } elseif (!empty($bracketMatch)) {
+            // 4. Query #2: Try bracket-stripped match only if Query #1 was empty
+            $npcTemlate2 = $db->fetchAll("SELECT npc_pers 
+                                        FROM combined_npc_templates
+                                        WHERE npc_name='{$bracketMatch}'");
+
+            if (!empty($npcTemlate2[0])) {
+                // Found a row by bracket match
+                file_put_contents($newFile,'$HERIKA_PERS=\''.addslashes(trim($npcTemlate2[0]["npc_pers"])).'\';'.PHP_EOL,FILE_APPEND | LOCK_EX);
+                $dynamicPrompts = include 'prompts/dynamic_prompts.php'; // Ensure this returns an array
+                file_put_contents($newFile, '$HERIKA_DYNAMIC=\''.addslashes(trim($dynamicPrompts[array_rand($dynamicPrompts)])).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
+
+            } else {
+                // Fallback if neither query found anything
+                file_put_contents($newFile,'$HERIKA_PERS=\'Roleplay as '.addslashes($npcname).'\';'.PHP_EOL,FILE_APPEND | LOCK_EX);
+                $dynamicPrompts = include 'prompts/dynamic_prompts.php'; // Ensure this returns an array
+                file_put_contents($newFile, '$HERIKA_DYNAMIC=\''.addslashes(trim($dynamicPrompts[array_rand($dynamicPrompts)])).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
+
+            }
+
+        } else {
+            // 5. Fallback if no bracket or no match found
+            file_put_contents($newFile,'$HERIKA_PERS=\'Roleplay as '.addslashes($npcname).'\';'.PHP_EOL,FILE_APPEND | LOCK_EX);
+        }
+
+            
         foreach ($FORCE_PARMS as $p=>$v) {
             file_put_contents($newFile, '$'.$p.'=\''.addslashes($v).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
         }
 
-        /* New voice logic */
-
+        // XTTS voiceid override from table. if fails then xtts voicelogic pick
         if (!empty($xttsid[0]['xtts_voiceid'])) {
             file_put_contents(
                 $newFile,
@@ -1874,37 +1917,29 @@ function createProfile($npcname,$FORCE_PARMS=[],$overwrite=false) {
                 FILE_APPEND | LOCK_EX
             );
         } else {
-            //original logic
-            file_put_contents(
-                $newFile,
-                '$TTS["XTTSFASTAPI"]["voiceid"]=\'' . $codename . '\';' . PHP_EOL,
-                FILE_APPEND | LOCK_EX
-            );
+            if ($voicelogic === "voicetype") {
+                file_put_contents($newFile, '$TTS["XTTSFASTAPI"]["voiceid"]=\'' . strtolower($voicetype[3]) . '\';' . PHP_EOL, FILE_APPEND | LOCK_EX);
+            } else {
+                file_put_contents($newFile, '$TTS["XTTSFASTAPI"]["voiceid"]=\'' . $codename . '\';' . PHP_EOL, flags: FILE_APPEND | LOCK_EX);
+            }
         }
-
-        // Check if melotts_voiceid exists and is not null
+        // MeloTTS voiceid override from table, if fails then generated normally.
         if (!empty($melottsid[0]['melotts_voiceid'])) {
             // Use the melotts_voiceid value
-            file_put_contents(
-                $newFile,
-                '$TTS["MELOTTS"]["voiceid"]=\'' . strtolower($melottsid[0]['melotts_voiceid']) . '\';' . PHP_EOL,
-                FILE_APPEND | LOCK_EX
-            );
+            file_put_contents($newFile,'$TTS["MELOTTS"]["voiceid"]=\'' . strtolower($melottsid[0]['melotts_voiceid']) . '\';' . PHP_EOL,FILE_APPEND | LOCK_EX);
         } else {
-            // original logic
-            file_put_contents(
-                $newFile,
-                '$TTS["MELOTTS"]["voiceid"]=\'' . strtolower($voicetype[3]) . '\';' . PHP_EOL,
-                FILE_APPEND | LOCK_EX
-            );
+            file_put_contents($newFile, '$TTS["MELOTTS"]["voiceid"]=\''.strtolower($voicetype[3]).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
         }
 
         //xvansynth logic from override table
-        file_put_contents(
-            $newFile,
-            '$TTS["XVASYNTH"]["model"]=\'' . strtolower($xvasnythid[0]['xvasynth_voiceid']) . '\';' . PHP_EOL,
-            FILE_APPEND | LOCK_EX
-        );
+        if (!empty($xvasynthid[0]['xvasynth_voiceid'])) {
+
+            file_put_contents($newFile,'$TTS["XVASYNTH"]["model"]=\'' . strtolower($xvasnythid[0]['xvasynth_voiceid']) . '\';' . PHP_EOL,FILE_APPEND | LOCK_EX);
+        }
+        else {
+            file_put_contents($newFile, '$TTS["XVASYNTH"]["model"]=\'sk_' . strtolower($voicetype[3]).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
+        }
+
 
         file_put_contents($newFile, '?>'.PHP_EOL, FILE_APPEND | LOCK_EX);
 
