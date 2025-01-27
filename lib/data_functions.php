@@ -1757,6 +1757,7 @@ function GetAnimationHex($mood)
         
     } else if ($mood=="drunk") {
         // No animation :(
+        error_log("Using filter for mood drunk");
         $GLOBALS["TTS_FFMPEG_FILTERS"]["tempo"]='atempo=0.65';
         return "DrunkStart";
         
