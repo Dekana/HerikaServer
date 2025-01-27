@@ -418,8 +418,8 @@ if (in_array($gameRequest[0],["rechat"]) ) {
 require(__DIR__.DIRECTORY_SEPARATOR."processor".DIRECTORY_SEPARATOR."comm.php");
 
 if ($MUST_END) {  // Shorthand for non LLM processing
-    die('X-CUSTOM-CLOSE');
-    
+    echo 'X-CUSTOM-CLOSE'.PHP_EOL;
+    return;
 }
 
 
@@ -731,7 +731,7 @@ if (!isset($GLOBALS["CURRENT_CONNECTOR"]) || (!file_exists(__DIR__.DIRECTORY_SEP
 
     require_once(__DIR__.DIRECTORY_SEPARATOR."connector".DIRECTORY_SEPARATOR."{$GLOBALS["CURRENT_CONNECTOR"]}.php");
 
-    $connectionHandler=new connector();
+    $connectionHandler = new $GLOBALS["CURRENT_CONNECTOR"];
     $connectionHandler->open($contextData,$overrideParameters);
     
 

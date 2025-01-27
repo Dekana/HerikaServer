@@ -198,7 +198,7 @@ if (!isset($GLOBALS["CURRENT_CONNECTOR"]) || !file_exists($enginePath . "connect
     ];
     $contextData = array_merge($head, $prompt);
 
-    $connectionHandler = new connector();
+    $connectionHandler = new $GLOBALS["CURRENT_CONNECTOR"];
     $connectionHandler->open($contextData, []);
 
     $buffer = "";
