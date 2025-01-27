@@ -48,7 +48,7 @@ $EMOTEMOODS="sassy,"
     . "neutral,"
     . "teasing,"
     . "mocking"; //List of moods passed to LLM (comma separated). Triggers animations if enabled.
-$SUMMARY_PROMPT=''; //Instructions added when generating summaries for memories and other features.
+$SUMMARY_PROMPT= 'Focus on key events, tagging characters, locations, and factions accurately. Ensure memories align and maintain chronological order while foreshadowing future arcs. Prioritize player agency, and use environmental cues to enhance storytelling and continuity.'; 
 $DYNAMIC_PROMPT = "Use the recent Dialogue history to update the dynamic character profile. "
     . " Mandatory Format:"
     . " Current goal: "
@@ -61,7 +61,7 @@ $DYNAMIC_PROMPT = "Use the recent Dialogue history to update the dynamic charact
     . "DO NOT WRITE HOW MANY KEYWORDS YOU HAVE USED OR OTHER META DATA!";
 
 //[AI/LLM Service Selection]
-$CONNECTORS=["openrouterjson","openaijson","google_openaijson","web_connector","koboldcppjson"]; //AI Service(s).
+$CONNECTORS=["openrouterjson","openaijson","koboldcppjson"]; //AI Service(s).
 $CONNECTORS_DIARY=["openrouter","openai","google_openaijson","koboldcpp"]; //Creates diary entries and memories.
 
 //[AI/LLM Connectors]

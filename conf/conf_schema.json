@@ -22,7 +22,7 @@
   "BOOK_EVENT_FULL": {"userlvl":"pro","type":"boolean","description":"Send full contents of book instead of only the book title to the AI. This will consume more tokens, but the AI will accurately summarize any book or note!"},
   "BOOK_EVENT_ALWAYS_NARRATOR": {"userlvl":"basic","type":"boolean","description":"The Narrator will be the only one to summarize books.<br><strong>SET THIS ON default profile to apply to all NPCs.</strong>","scope":"global"},
   "NARRATOR_TALKS": {"userlvl":"basic","type":"boolean","description":"Enable the Narrator.","scope":"global"},
-  "NARRATOR_WELCOME": {"userlvl":"basic","type":"boolean","description":"The Narrator will give you a quick recap of what happened previously after you have loaded a save game.","scope":"global"},
+  "NARRATOR_WELCOME": {"userlvl":"basic","type":"boolean","description":"The Narrator will give you a quick recap of what happened previously after you have loaded a save game. Has a 10 minute IRL cooldown so its not annoying.","scope":"global"},
   "QUEST_COMMENT":{"type":"boolean","userlvl":"pro","description":"Will trigger AI (NPCs and Narrator) to talk about new objectives in your current active quest. Will trigger a lot of events on a new character, so leave disabled until you complete the tutorial!"},
   "JSON_DIALOGUE_FORMAT_REORDER": {"type":"boolean","userlvl":"pro","description":"Reorders properties in the output JSON schema. AI generates an action first, then a dialogue comment. Some users report this improves actions performance."},
   "HERIKA_ANIMATIONS": {"userlvl":"pro","type":"boolean","description":"Will issue animations for the NPC to play", "helpurl":"https://docs.google.com/document/d/12KBar_VTn0xuf2pYw9MYQd7CKktx4JNr_2hiv4kOx3Q/edit?tab=t.0#heading=h.q88yv4qigyw7"},

@@ -1805,7 +1805,7 @@ function profile_exists($npcname) {
 }
 
 function createProfile($npcname,$FORCE_PARMS=[],$overwrite=false) {
-
+    sleep (3);
     global $db; 
 
     if ($npcname=="The Narrator")   // Refuse to add Narrator
@@ -1858,7 +1858,14 @@ function createProfile($npcname,$FORCE_PARMS=[],$overwrite=false) {
         
 
         $voicelogic = $GLOBALS["TTS"]["XTTSFASTAPI"]["voicelogic"];
-
+        //use the Nametype conf opts to latch onto the character name while still being able to pull the correct voicetype[3]
+        if ($voicelogic === "voicetype") {
+            $codename = npcNameToCodename($npcname);
+            $cn=$db->escape("Nametype/$codename");
+            $vtype=$db->fetchAll("select value from conf_opts where id='$cn'");
+            $voicetypeString=(isOk($vtype))?$vtype[0]["value"]:null;
+            $voicetype=explode("\\",$voicetypeString);
+        }
 
         // 1. Save the file lines
         file_put_contents($newFile, implode('', $file_lines));
