@@ -367,7 +367,7 @@ if ($pid) {
 
 
 // Fetch quest templates from the database
-$results = $db->fetchAll("SELECT title, data, enabled FROM aiquests_template order by enabled desc");
+$results = $db->fetchAll("SELECT uid,title, data, enabled FROM aiquests_template order by COALESCE(updated,0) desc");
 
 // Display quest templates
 echo "<h3 class='my-2'>AI Adventure Manager</h3>";
@@ -376,6 +376,7 @@ $list = [];
 foreach ($results as $n => $quest) {
     $questData = json_decode($quest['data'], true);
 
+    $list[$n]['Uid'] = htmlspecialchars($quest['uid']);
     $list[$n]['Title'] = htmlspecialchars($quest['title']);
     $list[$n]['Description'] = htmlspecialchars($questData['overview']);
     $list[$n]['Enabled'] = htmlspecialchars($quest['enabled']);
