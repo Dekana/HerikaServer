@@ -427,6 +427,12 @@ function DataLastDataExpandedFor($actor, $lastNelements = -10,$sqlfilter="")
 
     global $db;
 
+    if ($lastNelements == 0) { // if context_history is 0, all records will be retrieved
+        $lastNelements = -1;
+    }
+
+    $nRecordsLimit = 16 + (2 * abs($lastNelements)); // reduce the default 1000 recs loaded from db to a number proportional to context_history 
+
     $currentGameTs=$GLOBALS["gameRequest"][2]+0;
     if ($GLOBALS["gameRequest"][0]=="chatnf_book") {
         $removeBooks="";
@@ -454,7 +460,7 @@ function DataLastDataExpandedFor($actor, $lastNelements = -10,$sqlfilter="")
     and (people like '|%$actorEscaped%|' or people like '$actorEscaped') ":"")." 
     and type<>'funccall' $removeBooks  and type<>'togglemodel' $sqlfilter  ".
     ((false)?"and gamets>".($currentGameTs-(60*60*60*60)):"").
-    " order by gamets desc,ts desc,rowid desc LIMIT 1000 OFFSET 0";
+" order by gamets desc,ts desc,rowid desc LIMIT $nRecordsLimit OFFSET 0";  
     
     $results = $db->fetchAll($query);
 
