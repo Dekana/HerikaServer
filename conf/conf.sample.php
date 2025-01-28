@@ -28,7 +28,7 @@ $BOOK_EVENT_FULL=true; //Sends full contents of books to the AI
 $BOOK_EVENT_ALWAYS_NARRATOR=false; //Only The Narrator summarizes books.
 $NARRATOR_TALKS=true; //Enables the Narrator.
 $NARRATOR_WELCOME=true;
-$QUEST_COMMENT = true;
+$QUEST_COMMENT = false;
 $QUEST_COMMENT_CHANCE= "10%";
  //The Narrator will recap previous events after a save is loaded.
 $LANG_LLM_XTTS=false; //XTTS Only! Will offer a language field to LLM, and will try match to XTTSv2 language.
