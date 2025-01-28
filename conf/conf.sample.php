@@ -27,7 +27,10 @@ $MAX_WORDS_LIMIT=0; //Enforce a word limit for AI's responses. 0 = unlimited.
 $BOOK_EVENT_FULL=true; //Sends full contents of books to the AI
 $BOOK_EVENT_ALWAYS_NARRATOR=false; //Only The Narrator summarizes books.
 $NARRATOR_TALKS=true; //Enables the Narrator.
-$NARRATOR_WELCOME=false; //The Narrator will recap previous events after a save is loaded.
+$NARRATOR_WELCOME=true;
+$QUEST_COMMENT = false;
+$QUEST_COMMENT_CHANCE= "10%";
+ //The Narrator will recap previous events after a save is loaded.
 $LANG_LLM_XTTS=false; //XTTS Only! Will offer a language field to LLM, and will try match to XTTSv2 language.
 $HERIKA_ANIMATIONS=true; //Issues animations to AI driven NPCs.
 $EMOTEMOODS="sassy,"
