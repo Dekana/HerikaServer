@@ -1,7 +1,29 @@
 <?php 
 
+function checkVersion($tablename) {
+    global $db;
+    $query = "
+    SELECT version 
+    FROM database_versioning
+    WHERE tablename = '$tablename'
+    ";
 
-// Add people info to event log
+    $existsColumn=$db->fetchAll($query);
+
+    if (!$existsColumn[0]["version"] )
+        return -1;
+    else
+        return $existsColumn[0]["version"]+0;
+}
+
+function updateVersion($tablename,$version) {
+    global $db;
+    $db->execQuery("INSERT INTO public.database_versioning SELECT '$tablename',$version where not exists (SELECT 1 from public.database_versioning where tablename='$tablename')");
+    $db->execQuery("UPDATE public.database_versioning set version=$version WHERE tablename='$tablename'");
+    error_log("TABLE $tablename updated to version $version");
+}
+
+/////////////////////////
 
 $query = "
     SELECT column_name 
@@ -396,6 +418,68 @@ if (!$existsColumn[0]["version"] || $existsColumn[0]["version"]<20250120001) {
     $db->execQuery(file_get_contents(__DIR__."/../data/npc_templates_trl_es_v2.sql"));
     echo '<script>alert("A patch (npc_templates_trl [es]) has been applied to Database")</script>';
 }
+
+// Oghma npc table 20250129
+
+
+if (checkVersion("npc_templates")<20250129001) {
+    $query = "
+    ALTER TABLE npc_templates 
+    ADD COLUMN IF NOT EXISTS npc_dynamic TEXT;
+    ALTER TABLE npc_templates 
+    ADD COLUMN IF NOT EXISTS melotts_voiceid TEXT;
+    ALTER TABLE npc_templates 
+    ADD COLUMN IF NOT EXISTS xtts_voiceid TEXT;
+    ALTER TABLE npc_templates 
+    ADD COLUMN IF NOT EXISTS xvasynth_voiceid TEXT;
+    ";
+    $db->execQuery($query);
+    updateVersion("npc_templates",20250129001);
+}
+
+if (checkVersion("npc_templates_custom")<20250129001) {
+    $query = "
+    ALTER TABLE npc_templates_custom 
+    ADD COLUMN IF NOT EXISTS npc_dynamic TEXT;
+    ALTER TABLE npc_templates_custom 
+    ADD COLUMN IF NOT EXISTS melotts_voiceid TEXT;
+    ALTER TABLE npc_templates_custom 
+    ADD COLUMN IF NOT EXISTS xtts_voiceid TEXT;
+    ALTER TABLE npc_templates_custom 
+    ADD COLUMN IF NOT EXISTS xvasynth_voiceid TEXT;
+    ";
+    $db->execQuery($query);
+    updateVersion("npc_templates_custom",20250129001);
+}
+
+if (checkVersion("combined_npc_templates")<20250129001) {
+    $query="
+    DROP VIEW public.combined_npc_templates;
+    CREATE VIEW public.combined_npc_templates AS
+     SELECT c.npc_name,
+        c.npc_pers,
+        c.npc_dynamic,
+        c.npc_misc,
+        c.melotts_voiceid,
+        c.xtts_voiceid,
+        c.xvasynth_voiceid
+       FROM public.npc_templates_custom c
+    UNION ALL
+     SELECT t.npc_name,
+        t.npc_pers,
+        t.npc_dynamic,
+        t.npc_misc,
+        t.melotts_voiceid,
+        t.xtts_voiceid,
+        t.xvasynth_voiceid
+       FROM (public.npc_templates t
+         LEFT JOIN public.npc_templates_custom c ON (((t.npc_name)::text = (c.npc_name)::text)))
+      WHERE (c.npc_name IS NULL);";
+    
+    $db->execQuery($query);
+    updateVersion("combined_npc_templates",20250129001);
+}
+
 
 
 ?>
