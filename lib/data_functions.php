@@ -1843,13 +1843,14 @@ function createProfile($npcname,$FORCE_PARMS=[],$overwrite=false) {
         
         if (empty($GLOBALS["CORE_LANG"])) {
             $npcTemlate=$db->fetchAll("SELECT npc_pers FROM combined_npc_templates where npc_name='$codename'");
-
+            $npcdynamic=$db->fetchAll("SELECT npc_dynamic FROM combined_npc_templates where npc_name='$codename'");
         } else {
             error_log("Using npc_templates_trl, name_trl='$codename' and lang='{$GLOBALS["CORE_LANG"]}'");
             $npcTemlate=$db->fetchAll("SELECT npc_pers FROM npc_templates_trl where name_trl='$codename' and lang='{$GLOBALS["CORE_LANG"]}'");
             if (!isset($npcTemlate[0])) {
                 error_log("No trl found, using standard template");
                 $npcTemlate=$db->fetchAll("SELECT npc_pers FROM combined_npc_templates where npc_name='$codename'");
+                $npcdynamic=$db->fetchAll("SELECT npc_dynamic FROM combined_npc_templates where npc_name='$codename'");
             }
         }
         
@@ -1883,7 +1884,8 @@ function createProfile($npcname,$FORCE_PARMS=[],$overwrite=false) {
         if (isset($npcTemlate[0]) && is_array($npcTemlate[0])) {
 
             file_put_contents($newFile, '$HERIKA_PERS=\''.addslashes(trim($npcTemlate[0]["npc_pers"])).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
-        
+            file_put_contents($newFile, '$HERIKA_DYNAMIC=\''.addslashes(trim($npcdynamic[0]["npc_dynamic"])).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
+
             // RealNamesExtended support for generic npcs
         } elseif (!empty($bracketMatch)) {
             // 4. Query #2: Try bracket-stripped match only if Query #1 was empty
