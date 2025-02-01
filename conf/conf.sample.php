@@ -191,7 +191,7 @@ $TTS["MELOTTS"]["voiceid"]='malenord'; //Voice ID.
 $TTS["XTTSFASTAPI"]["endpoint"]='http://127.0.0.1:8020'; //API endpoint.
 $TTS["XTTSFASTAPI"]["language"]='en'; //Lanuguage.
 $TTS["XTTSFASTAPI"]["voiceid"]='TheNarrator'; //Generated voice file name.
-$TTS["XTTSFASTAPI"]["voicelogic"]='name';
+$TTS["XTTSFASTAPI"]["voicelogic"]='voicetype';
 //MIMIC3
 $TTS["MIMIC3"]["URL"]="http://127.0.0.1:59125"; //API endpoint. 
 $TTS["MIMIC3"]["voice"]="en_UK/apope_low#default"; //Voice ID.
