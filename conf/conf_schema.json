@@ -60,7 +60,7 @@
       "json_schema": {"type":"boolean","description":"Enable OpenRouter Json schema. Does not work with all models. You must set a provider that supports structured outputs. Requires ENFORCE_JSON to be true.","helpurl":"https://openrouter.ai/docs/structured-outputs#model-support"}
     },
     "openrouter": {
-      "_title":"OpenRouter API",
+      "_title":"OpenRouter API (SUMMARY)",
       "url": {"type":"url","description":"OpenRouter API endpoint"},
       "model": {"type":"ormodellist","description":"Model to use.<br>FREE MODELS ARE NOT RECOMMENDED!<br>If you change model use buttons below to set new parameters!","helpurl":"https://openrouter.ai/docs#models"},
       "PROVIDER": {"type":"string","description":"Leave blank unless you want to manually select a provider from OpenRouter. It is case sensitive!","helpurl":"https://openrouter.ai/docs/provider-routing"},
@@ -95,7 +95,7 @@
       "json_schema": {"type":"boolean","description":"Enable OpenAI Json schema. Does not work with all OpenAI's models","helpurl":"https://platform.openai.com/docs/guides/structured-outputs?lang=js"}
     },
     "openai": {
-      "_title":"OpenAI/ChatGPT API",
+      "_title":"OpenAI/ChatGPT API (SUMMARY)",
       "url": {"type":"url","description":"OpenAI API endpoint"},
       "model": {"type":"string","description":"Model to use","helpurl":"https://platform.openai.com/docs/models/"},
       "max_tokens": {"type":"integer","description":"Maximum tokens to generate"},
@@ -138,7 +138,7 @@
       "grammar": {"type":"boolean","description":"Enforces use of JSON grammar. True to enforce (generation speed loss, but json format guaranteed). if false, the generation speed will be better but will depend on the model to produce valid JSON output." }
     },
     "koboldcpp": {
-      "_title":"KoboldCPP API",
+      "_title":"KoboldCPP API (SUMMARY)",
       "url": {"type":"url","description":"Kobold ideally should be running on the same machine as DwemerDistro!<br>Must use your computers, not the DwemerDistro, IP Address.<br>Can be found by running the command 'ipconfig' in your CMD prompt.<br>Example: http://your-local-ip:8008","helpurl":"https://www.nexusmods.com/skyrimspecialedition/articles/5742"},
       "max_tokens": {"type":"integer","description":"Maximum tokens to generate"},
       "temperature": {"type":"number","description":"Temperature [0-2]"},
