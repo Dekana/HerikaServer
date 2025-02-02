@@ -18,7 +18,7 @@ $MINIME_T5=false; //Assists smaller weight LLMs with action and memory functions
 //[Advanced Configuration]
 $RECHAT_H=2; //Rechat Rounds. Higher values will increase the amount of rounds NPC's will talk amongst themselves.
 $RECHAT_P=50; //Rechat Probability.
-$BORED_EVENT=5; //Bored Event Probability. Chance of an NPC starting a random conversation after a set period of time.
+$BORED_EVENT=30; //Bored Event Probability. Chance of an NPC starting a random conversation after a set period of time.
 $CONTEXT_HISTORY="50"; //Amount of context history (dialogue and events) that will be sent to LLM.
 $HTTP_TIMEOUT=15; //Timeout for AI requests.
 $CORE_LANG=""; //Custom languages. - language folder
@@ -191,7 +191,7 @@ $TTS["MELOTTS"]["voiceid"]='malenord'; //Voice ID.
 $TTS["XTTSFASTAPI"]["endpoint"]='http://127.0.0.1:8020'; //API endpoint.
 $TTS["XTTSFASTAPI"]["language"]='en'; //Lanuguage.
 $TTS["XTTSFASTAPI"]["voiceid"]='TheNarrator'; //Generated voice file name.
-$TTS["XTTSFASTAPI"]["voicelogic"]='name';
+$TTS["XTTSFASTAPI"]["voicelogic"]='voicetype';
 //MIMIC3
 $TTS["MIMIC3"]["URL"]="http://127.0.0.1:59125"; //API endpoint. 
 $TTS["MIMIC3"]["voice"]="en_UK/apope_low#default"; //Voice ID.
