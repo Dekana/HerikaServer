@@ -53,7 +53,7 @@
       "MAX_TOKENS_MEMORY": {"type":"integer","description":"Maximum tokens to generate when summarizing, such as writing to diary."},
       "get_parms1": {"type":"util","description":"Autofill parameter settings for the currently selected model for minimal randomness in AI response (P10)","action":"action_openrouterjson_get_parm_p1.php?P=10","name":"Autofill Parameters: Low Randomness","helpurl":"https://openrouter.ai/docs/parameters"},
       "get_parms5": {"type":"util","description":"Autofill parameter settings for the currently selected model for some randomness in AI response (P50)","action":"action_openrouterjson_get_parm_p1.php?P=50","name":"Autofill Parameters: Medium Randomness","helpurl":"https://openrouter.ai/docs/parameters"},
-      "get_parms9": {"type":"util","description":"Autofill parameter settings for the currently selected model for very randomness in AI response (P90)","action":"action_openrouterjson_get_parm_p1.php?P=90","name":"Autofill Parameters: High Randomness","helpurl":"https://openrouter.ai/docs/parameters"},
+      "get_parms9": {"type":"util","description":"Autofill parameter settings for the currently selected model for high randomness in AI response (P90)","action":"action_openrouterjson_get_parm_p1.php?P=90","name":"Autofill Parameters: High Randomness","helpurl":"https://openrouter.ai/docs/parameters"},
       "API_KEY":  {"type":"apikey","description":"OpenRouter key","code":"OPENAI_API_KEY"},
       "xreferer": {"userlvl":"pro","type":"string","description":"Stub needed header. Keep default."},
       "xtitle": {"userlvl":"pro","type":"string","description":"Stub needed header. Keep default."},
@@ -79,7 +79,7 @@
       "xtitle": {"userlvl":"pro","type":"string","description":"Stub needed header. Keep default."},
       "get_parms1": {"type":"util","description":"Autofill parameter settings for the currently selected model for minimal randomness in AI response (P10)","action":"action_openrouter_get_parm_p1.php?P=10","name":"Autofill Parameters: Low Randomness","helpurl":"https://openrouter.ai/docs/parameters"},
       "get_parms5": {"type":"util","description":"Autofill parameter settings for the currently selected model for some randomness in AI response (P50)","action":"action_openrouter_get_parm_p1.php?P=50","name":"Autofill Parameters: Medium Randomness","helpurl":"https://openrouter.ai/docs/parameters"},
-      "get_parms9": {"type":"util","description":"Autofill parameter settings for the currently selected model for very randomness in AI response (P90)","action":"action_openrouter_get_parm_p1.php?P=90","name":"Autofill Parameters: High Randomness","helpurl":"https://openrouter.ai/docs/parameters"}
+      "get_parms9": {"type":"util","description":"Autofill parameter settings for the currently selected model for high randomness in AI response (P90)","action":"action_openrouter_get_parm_p1.php?P=90","name":"Autofill Parameters: High Randomness","helpurl":"https://openrouter.ai/docs/parameters"}
     },
     "openaijson": {
       "_title":"OpenAI/ChatGPT API (JSON)",
@@ -122,7 +122,7 @@
     },
     "koboldcppjson": {
       "_title":"KoboldCPP API (JSON)",
-      "url": {"type":"url","description":"Kobold ideally should be running on the same machine as DwemerDistro!<br>Must use your computers, not the DwemerDistro, IP Address.<br>Can be found by running the command 'ipconfig' in your CMD prompt.<br>Example: http://your-local-ip:8008","helpurl":"https://docs.google.com/document/d/12KBar_VTn0xuf2pYw9MYQd7CKktx4JNr_2hiv4kOx3Q/edit?tab=t.0#heading=h.4c92h73gekhw"},
+      "url": {"type":"url","description":"Kobold should be running on the same machine as DwemerDistro!<br>Must use your computers, not the DwemerDistro, IP Address.<br>Can be found by running the command 'ipconfig' in your CMD prompt.<br>Example: http://your-local-ip:8008","helpurl":"https://docs.google.com/document/d/12KBar_VTn0xuf2pYw9MYQd7CKktx4JNr_2hiv4kOx3Q/edit?tab=t.0#heading=h.4c92h73gekhw"},
       "max_tokens": {"type":"integer","description":"Maximum tokens to generate"},
       "temperature": {"type":"number","description":"Temperature [0-2]"},
       "rep_pen": {"type":"number","description":"Repetition Penalty [0-2]"},
@@ -139,7 +139,7 @@
     },
     "koboldcpp": {
       "_title":"KoboldCPP API (SUMMARY)",
-      "url": {"type":"url","description":"Kobold ideally should be running on the same machine as DwemerDistro!<br>Must use your computers, not the DwemerDistro, IP Address.<br>Can be found by running the command 'ipconfig' in your CMD prompt.<br>Example: http://your-local-ip:8008","helpurl":"https://docs.google.com/document/d/12KBar_VTn0xuf2pYw9MYQd7CKktx4JNr_2hiv4kOx3Q/edit?tab=t.0#heading=h.4c92h73gekhw"},
+      "url": {"type":"url","description":"Kobold should be running on the same machine as DwemerDistro!<br>Must use your computers, not the DwemerDistro, IP Address.<br>Can be found by running the command 'ipconfig' in your CMD prompt.<br>Example: http://your-local-ip:8008","helpurl":"https://docs.google.com/document/d/12KBar_VTn0xuf2pYw9MYQd7CKktx4JNr_2hiv4kOx3Q/edit?tab=t.0#heading=h.4c92h73gekhw"},
       "max_tokens": {"type":"integer","description":"Maximum tokens to generate"},
       "temperature": {"type":"number","description":"Temperature [0-2]"},
       "rep_pen": {"userlvl":"pro","type":"number","description":"Repetition Penalty [0-2]"},
@@ -166,27 +166,27 @@
     },
     "XTTSFASTAPI": {
       "_title":"CHIM XTTS (Installed in DwemerDistro)",
-      "endpoint":{"type":"url","description":"End point URL. Leave as default if you installed XTTS through the Distro.<br>Be warned it takes 4GB of VRAM to run it!<br>You can run it on the cloud, click the help/doc link for instructions.", "helpurl":"https://docs.google.com/document/d/12KBar_VTn0xuf2pYw9MYQd7CKktx4JNr_2hiv4kOx3Q/edit?tab=t.0#heading=h.ojs1hcgp0qwl"},
+      "endpoint":{"type":"url","description":"Endpoint URL. Leave as default if you use CHIM XTTS.<br>You can run it on the cloud or use Mantella XTTS. Click the help link to learn more.", "helpurl":"https://docs.google.com/document/d/12KBar_VTn0xuf2pYw9MYQd7CKktx4JNr_2hiv4kOx3Q/edit?tab=t.0#heading=h.ojs1hcgp0qwl"},
       "language":{"type":"select","values":[  "ar","pt","zh-cn", "cs","nl","en","fr", "de", "it", "pl", "ru", "es", "tr","ja", "ko","hu","hi"],"description":"Language"},
-      "voiceid":{"type":"string","description":"Generated voice file name. Click link to go to XTTS management to view voiceids.<br><b>To use Mantella XTTS voices you must install the MinAI plugin!</b>","helpurl":"/HerikaServer/ui/xtts_clone.php"},
+      "voiceid":{"type":"string","description":"Generated voice file name. Click the help link to go to XTTS management.","helpurl":"/HerikaServer/ui/xtts_clone.php"},
       "voicelogic":{"type":"select","values":["voicetype","name"], "description":"Default profile only. Logic used for generating [TTS XTTSFASTAPI voiceid] <br> voicetype = NPC voicetype ID (femalenord) <br> name = NPC name (mjoll_the_lioness)", "scope":"global"}
     },
     "MIMIC3": {
       "_title":"MIMIC3 (Installed in DwemerDistro)",
       "URL": {"type":"url","description":"MIMIC3 Service URL."},
-      "voice": {"type":"string","description":"Voice code"},
-      "rate": {"type":"number","description":"Talk speed"},
-      "volume": {"type":"integer","description":"Volume"}
+      "voice": {"type":"string","description":"Voice ID code"},
+      "rate": {"type":"number","description":"Voice speed"},
+      "volume": {"type":"integer","description":"Voice Volume"}
     },
     "XVASYNTH": {
       "_title":"xVASynth",
-      "url":{"type":"url","description":"xVASynth ideally should be running on the same machine as DwemerDistro!<br>Must use your computers, not the DwemerDistro, IP Address.<br>Can be found by running the command 'ipconfig' in your CMD prompt.<br>Example: http://your-local-ip:8008<br>Click the <b>help/doc</b> link for more info.","helpurl":"https://docs.google.com/document/d/12KBar_VTn0xuf2pYw9MYQd7CKktx4JNr_2hiv4kOx3Q/edit?tab=t.0#heading=h.3tf6myep6rmw"},
+      "url":{"type":"url","description":"xVASynth should be running on the same machine as DwemerDistro!<br>Must use your computers IP Address.<br>Can be found by running the command 'ipconfig' in your CMD prompt.<br>Example: http://your-local-ip:8008<br>Click the <b>help/doc</b> link for more info.","helpurl":"https://docs.google.com/document/d/12KBar_VTn0xuf2pYw9MYQd7CKktx4JNr_2hiv4kOx3Q/edit?tab=t.0#heading=h.3tf6myep6rmw"},
       "base_lang":{"type":"string","description":"Base language"},
-      "modelType":{"type":"string","description":"modelType"},
+      "modelType":{"type":"string","description":"Model Type"},
       "model":{"type":"string","description":"Model"},
       "pace":{"type":"number","description":"Pace"},
-      "waveglowPath":{"type":"string","description":"waveglowPath (relative)"},
-      "vocoder":{"type":"string","description":"vocoder"},
+      "waveglowPath":{"type":"string","description":"Wave Glow Path (relative)"},
+      "vocoder":{"type":"string","description":"Vocoder"},
       "distroname":{"type":"string","description":"Leave as default!"}
     },
     "AZURE": {
@@ -227,7 +227,7 @@
     },
     "CONVAI": {
       "_title":"CONVAI TTS",
-      "endpoint":{"type":"url","description":"End point URL","helpurl":"https://docs.convai.com/api-docs/reference/core-api-reference/standalone-voice-api/text-to-speech-api"},
+      "endpoint":{"type":"url","description":"Endpoint URL","helpurl":"https://docs.convai.com/api-docs/reference/core-api-reference/standalone-voice-api/text-to-speech-api"},
       "API_KEY":{"type":"apikey","description":"API KEY"},
       "language":{"type":"select","values":["ar", "cmn-CN", "de-DE", "en-US", "es-ES", "es-MX", "es-US", "fr-FR", "hi-IN", "it-IT", "js-JP", "kk-KZ", "ko-KR", "nl-BE", "nl-NL", "pl-PL", "pt-BR", "pt-PT", "ru-RU", "sv-SE", "tr-TR", "vi-VN", "yue-HK", "zh-HK"],"description":"Language","helpurl":"https://platform.openai.com/docs/guides/text-to-speech"},
       "voiceid":{"type":"string","description":"Voice id (check compatability with language)","helpurl":"https://docs.convai.com/api-docs/reference/core-api-reference/standalone-voice-api/text-to-speech-api"},
@@ -235,7 +235,7 @@
       },
     "KOKORO": {
       "_title":"KOKORO 82M",
-      "endpoint":{"type":"url","description":"End point URL","helpurl":""},
+      "endpoint":{"type":"url","description":"Endpoint URL","helpurl":""},
       "voiceid":{"type":"string","description":"Voice id (check compatability with language)","helpurl":""},
       "speed":{"type":"number","description":"Speed"}
     },
@@ -328,7 +328,7 @@
     "ADD_TIME_MARKS":{"type":"boolean","description":"Add timestamps to the context logs. Helps with memory recollection."},
     "ITT_QUALITY": {"type":"integer","description":"Only for Soulgaze HD. Compression quality can be set from 0 (lower and unusable) to 100 (near no compression). More quality means higher file size, ergo more tokens.","scope":"global"},
     "TTS_RANDOM_PITCH": {"type":"boolean","userlvl":"pro","description":"WIP DO NOT USE! Adjusting the pitch when generating the voice for this actor will add variation, so actors using the same voice sound slightly distinct."},
-    "LIFE_LINK_PLUGIN": {"type":"boolean","userlvl":"pro","description":"WIP. Use life link plugin for dynamic profiles"}
+    "LIFE_LINK_PLUGIN": {"type":"boolean","userlvl":"wip","description":"WIP. Use life link plugin for dynamic profiles"}
   }
   }
   
