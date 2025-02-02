@@ -1383,73 +1383,6 @@ function DataBeingsInCloseRange()
     return "|".$beingsFormatted."|";
 }
 
-function GetExpression($mood) {
-   $EXPRESSIONS=[
-    "DialogueAnger",    "DialogueFear",    "DialogueHappy",     "DialogueSad",
-    "DialogueSurprise", "DialoguePuzzled", "DialogueDisgusted", "MoodNeutral",
-    "MoodAnger",        "MoodFear",        "MoodHappy",        "MoodSad",
-    "MoodSurprise",    "MoodPuzzled",    "MoodDisgusted",    "CombatAnger",
-    "CombatShout"
-    ];
-    
-    if ($mood=="sarcastic") {
-        return array_rand(array_flip(["DialoguePuzzled"]), 1);
-        
-        
-    } else if ($mood=="sassy") {
-        return array_rand(array_flip(["DialoguePuzzled"]), 1);
-        
-        
-    } else if ($mood=="sardonic") {
-        return array_rand(array_flip(["DialoguePuzzled"]), 1);
-        
-        
-    } else if ($mood=="irritated") {
-        return array_rand(array_flip(["DialogueAnger"]), 1);
-       
-        
-    } else if ($mood=="mocking") {
-        return array_rand(array_flip(["DialogueHappy"]), 1);
-        
-        
-    } else if ($mood=="playful") {
-        return array_rand(array_flip(["DialogueHappy"]), 1);
-            
-    } else if ($mood=="teasing") {
-        return array_rand(array_flip(["DialogueSurprise"]), 1);
-        
-        
-    } else if ($mood=="smug") {
-        return array_rand(array_flip(["DialogueAnger"]), 1);
-        
-        
-    } else if ($mood=="amused") {
-        return array_rand(array_flip(["DialogueSurprise"]), 1);
-        
-    } else if ($mood=="smirking") {
-        return array_rand(array_flip(["DialogueHappy"]), 1);
-    
-        
-    } else if ($mood=="serious") {
-        return array_rand(array_flip(["MoodNeutral"]), 1);
-    
-        
-    } else if ($mood=="firm") {
-        return array_rand(array_flip(["MoodNeutral"]), 1);
-    
-        
-    } if ($mood=="neutral") {
-        return array_rand(array_flip(["MoodNeutral"]), 1);
-        
-        
-    }
-                            
-    
-    
-    return "";
-    
-}
-
 function DataSearchMemory($rawstring,$npcfilter) {
     
     //$kw=explode(" ",($rawstring));
@@ -1732,7 +1665,7 @@ function GetAnimationHex($mood)
         
         
     } else if ($mood=="playful") {
-        return array_rand(array_flip([$ANIMATIONS["Cheer"],$ANIMATIONS["HappyDialogue"]]), 1);
+        return array_rand(array_flip([$ANIMATIONS["Cheer"],$ANIMATIONS["HappyDialogue"],$ANIMATIONS["Positive"]]), 1);
             
     } else if ($mood=="teasing") {
         return array_rand(array_flip([$ANIMATIONS["NervousDialogue"],$ANIMATIONS["NervousDialogue1"],$ANIMATIONS["NervousDialogue2"],$ANIMATIONS["NervousDialogue3"]]), 1);
@@ -1771,14 +1704,83 @@ function GetAnimationHex($mood)
         // No animation :(
         $GLOBALS["TTS_FFMPEG_FILTERS"]["tempo"]='atempo=1.45';
         
-    }
-                            
+    } 
+                      
     
     
     return "";
 
 }
 
+
+function GetExpression($mood) {
+    $EXPRESSIONS=[
+     "DialogueAnger",    "DialogueFear",    "DialogueHappy",     "DialogueSad",
+     "DialogueSurprise", "DialoguePuzzled", "DialogueDisgusted", "MoodNeutral",
+     "MoodAnger",        "MoodFear",        "MoodHappy",        "MoodSad",
+     "MoodSurprise",    "MoodPuzzled",    "MoodDisgusted",    "CombatAnger",
+     "CombatShout"
+     ];
+     
+     if ($mood=="sarcastic") {
+         return array_rand(array_flip(["DialoguePuzzled"]), 1);
+         
+         
+     } else if ($mood=="sassy") {
+         return array_rand(array_flip(["DialoguePuzzled"]), 1);
+         
+         
+     } else if ($mood=="sardonic") {
+         return array_rand(array_flip(["DialoguePuzzled"]), 1);
+         
+         
+     } else if ($mood=="irritated") {
+         return array_rand(array_flip(["DialogueAnger"]), 1);
+        
+         
+     } else if ($mood=="mocking") {
+         return array_rand(array_flip(["DialogueHappy"]), 1);
+         
+         
+     } else if ($mood=="playful") {
+         return array_rand(array_flip(["DialogueHappy"]), 1);
+             
+     } else if ($mood=="teasing") {
+         return array_rand(array_flip(["DialogueSurprise"]), 1);
+         
+         
+     } else if ($mood=="smug") {
+         return array_rand(array_flip(["DialogueAnger"]), 1);
+         
+         
+     } else if ($mood=="amused") {
+         return array_rand(array_flip(["DialogueSurprise"]), 1);
+         
+     } else if ($mood=="smirking") {
+         return array_rand(array_flip(["DialogueHappy"]), 1);
+     
+         
+     } else if ($mood=="serious") {
+         return array_rand(array_flip(["MoodNeutral"]), 1);
+     
+         
+     } else if ($mood=="firm") {
+         return array_rand(array_flip(["MoodNeutral"]), 1);
+     
+         
+     } if ($mood=="neutral") {
+         return array_rand(array_flip(["MoodNeutral"]), 1);
+         
+         
+     }
+                             
+     
+     
+     return "";
+     
+ }
+
+ 
 function isOk($arr) {
     if (is_array($arr))
         if (sizeof($arr)>0)
@@ -1802,7 +1804,7 @@ function profile_exists($npcname) {
 }
 
 function createProfile($npcname,$FORCE_PARMS=[],$overwrite=false) {
-    sleep (3);
+   
     global $db; 
 
     if ($npcname=="The Narrator")   // Refuse to add Narrator
@@ -1813,18 +1815,21 @@ function createProfile($npcname,$FORCE_PARMS=[],$overwrite=false) {
 
     $codename = npcNameToCodename($npcname);
     
-    $cn=$db->escape("Voicetype/$codename");
-    $vtype=$db->fetchAll("select value from conf_opts where id='$cn'");
-    $voicetypeString=(isOk($vtype))?$vtype[0]["value"]:null;
-    $voicetype=explode("\\",$voicetypeString);
-
-    $xttsid=$db->fetchAll("SELECT xtts_voiceid FROM combined_npc_templates WHERE npc_name='$codename'");
-    $melottsid=$db->fetchAll("SELECT melotts_voiceid FROM combined_npc_templates WHERE npc_name='$codename'");
-    $xvasnythid=$db->fetchAll("SELECT xvasynth_voiceid	 FROM combined_npc_templates WHERE npc_name='$codename'");
+   
 
     if (!file_exists($path . "conf".DIRECTORY_SEPARATOR."conf_$newConfFile.php") || $overwrite) {
         
         error_log("Overwritting conf");
+        sleep (1);
+        $cn=$db->escape("Voicetype/$codename");
+        $vtype=$db->fetchAll("select value from conf_opts where id='$cn'");
+        $voicetypeString=(isOk($vtype))?$vtype[0]["value"]:null;
+        $voicetype=explode("\\",$voicetypeString);
+    
+        $xttsid=$db->fetchAll("SELECT xtts_voiceid FROM combined_npc_templates WHERE npc_name='$codename'");
+        $melottsid=$db->fetchAll("SELECT melotts_voiceid FROM combined_npc_templates WHERE npc_name='$codename'");
+        $xvasnythid=$db->fetchAll("SELECT xvasynth_voiceid	 FROM combined_npc_templates WHERE npc_name='$codename'");
+
         // Do customizations here
         $newFile=$path . "conf".DIRECTORY_SEPARATOR."conf_$newConfFile.php";
         copy($path . "conf".DIRECTORY_SEPARATOR."conf.php",$newFile);
