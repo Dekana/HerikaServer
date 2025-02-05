@@ -698,9 +698,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <i><p>Refresh page to see new characters.</p></i>
                 <!-- A-Z and Favorites Filter Buttons -->
                 <div class="filter-buttons">
-                    <button class="filter-button" data-filter="all">All</button>
+                    <button class="filter-button" data-filter="latest">All</button>
                     <button class="filter-button" data-filter="favorites">Favorites</button>
-                    <button class="filter-button" data-filter="latest">Newest</button>
                     <?php foreach (range('A', 'Z') as $letter): ?>
                         <button class="filter-button" data-filter="<?php echo $letter; ?>"><?php echo $letter; ?></button>
                     <?php endforeach; ?>
@@ -780,13 +779,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 // Append them in the new order & show them, unless they start with '*'
                                 const parent = profileContainers[0].parentNode;
                                 sortedContainers.forEach(container => {
-                                    const profileText = container.textContent.trim(); // Get the text content of the profile
-                                    if (profileText.startsWith('*')) {
-                                        container.style.display = 'none'; // Hide profiles starting with '*'
-                                    } else {
-                                        container.style.display = 'block'; // Show other profiles
-                                        parent.appendChild(container);
-                                    }
+                                    container.style.display = 'block'; // Show all profiles
+                                    parent.appendChild(container);
                                 });
                             }
                             else {
@@ -803,7 +797,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
                 // Optionally, activate 'All' filter by default
-                const allFilterBtn = document.querySelector('.filter-button[data-filter="all"]');
+                const allFilterBtn = document.querySelector('.filter-button[data-filter="latest"]');
                 if (allFilterBtn) {
                     allFilterBtn.click();
                 }
