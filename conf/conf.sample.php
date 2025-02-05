@@ -22,6 +22,7 @@ $BORED_EVENT=30; //Bored Event Probability. Chance of an NPC starting a random c
 $CONTEXT_HISTORY="50"; //Amount of context history (dialogue and events) that will be sent to LLM.
 $HTTP_TIMEOUT=15; //Timeout for AI requests.
 $CORE_LANG=""; //Custom languages. - language folder
+$ALIVE_MESSAGE=true; //Leave as is - read only
 $NEWQUEUE=true; //Leave as is - read only
 $MAX_WORDS_LIMIT=0; //Enforce a word limit for AI's responses. 0 = unlimited.
 $BOOK_EVENT_FULL=true; //Sends full contents of books to the AI
