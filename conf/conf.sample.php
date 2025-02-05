@@ -64,6 +64,8 @@ $DYNAMIC_PROMPT = "Use the recent Dialogue history to update the dynamic charact
     . " Relation with other characters if any: "
     . "DO NOT WRITE HOW MANY KEYWORDS YOU HAVE USED OR OTHER META DATA!";
 
+$RPG_COMMENT=["levelup","learn_shout","learn_word","absorb_soul", "bleedout", "combat_end", "lockpick", "sleep"]; //AI Service(s).
+
 //[AI/LLM Service Selection]
 $CONNECTORS=["openrouterjson","openaijson","koboldcppjson"]; //AI Service(s).
 $CONNECTORS_DIARY=["openrouter","openai","google_openaijson","koboldcpp"]; //Creates diary entries and memories.
