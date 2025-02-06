@@ -1,6 +1,6 @@
 <?php
 
-
+require_once("utils.php");
 
 // used for openai_token_count table
 
@@ -70,7 +70,7 @@ function DataLastDataFor($actor, $lastNelements = -10)
 
     foreach ($lastDialogFull as $n => $line) {
 
-        $pattern = '/(\w+), (\d{1,2}:\d{2} (?:AM|PM)), (\d{1,2})(?:st|nd|rd|th) of ([A-Za-z\ ]+), 4E (\d+)/';
+        $pattern = '/(\w+), (\d{1,2}:\d{2} (?:AM|PM)), (\d{1,2})(?:st|nd|rd|th) of ([A-Za-z\'\ ]+), 4E (\d+)/'; //extract also for months with apostrophe like Sun's Something
         $replacement = 'Day name: $1, Hour: $2, Day Number: $3, Month: $4, 4th Era, Year: $5';
         $result = preg_replace($pattern, $replacement, $line["content"]);
         $lastDialogFull[$n]["content"] = $result;
@@ -122,7 +122,7 @@ function DataLastInfoFor($actor, $lastNelements = -2)
 
     foreach ($lastDialog as $n => $line) {
 
-        $pattern = '/(\w+), (\d{1,2}:\d{2} (?:AM|PM)), (\d{1,2})(?:st|nd|rd|th) of ([A-Za-z\ ]+), 4E (\d+)/';
+        $pattern = '/(\w+), (\d{1,2}:\d{2} (?:AM|PM)), (\d{1,2})(?:\w+)?(?:(?:st|nd|rd|th) of |\/)(.+), 4E (\d+)/u'; //extract also for months with apostrophe like Sun's Something
         $replacement = 'Day name: $1, Hour: $2, Day Number: $3, Month: $4, 4th Era, Year: $5';
         $result = preg_replace($pattern, $replacement, $line["content"]);
         $lastDialogFull[$n]["content"] = $result;
@@ -427,6 +427,12 @@ function DataLastDataExpandedFor($actor, $lastNelements = -10,$sqlfilter="")
 
     global $db;
 
+    if ($lastNelements == 0) { // if context_history is 0, all records will be retrieved
+        $lastNelements = -1;
+    }
+
+    $nRecordsLimit = 16 + (2 * abs($lastNelements)); // reduce the default 1000 recs loaded from db to a number proportional to context_history 
+
     $currentGameTs=$GLOBALS["gameRequest"][2]+0;
     if ($GLOBALS["gameRequest"][0]=="chatnf_book") {
         $removeBooks="";
@@ -448,15 +454,17 @@ function DataLastDataExpandedFor($actor, $lastNelements = -10,$sqlfilter="")
     FROM  eventlog a WHERE 1=1
     and type<>'combatend'  
     and type<>'bored' and type<>'init' and type<>'infoloc' and type<>'info' and type<>'funcret' and type<>'book' and type<>'addnpc' and type<>'infonpc'  
-    and type<>'updateprofile' and type<>'rechat' and type<>'setconf' and  type<>'status_msg'  and type<>'user_input' 
-    ".(($actorEscaped)?" and people like '|%$actorEscaped%|' ":"")." 
+    and type<>'updateprofile' and type<>'rechat' and type<>'setconf' and  type<>'status_msg'  and type<>'user_input'  and type<>'infonpc_close'  and type<>'instruction'
+    and type<>'request'
+    ".(($actorEscaped)?" 
+    and (people like '|%$actorEscaped%|' or people like '$actorEscaped') ":"")." 
     and type<>'funccall' $removeBooks  and type<>'togglemodel' $sqlfilter  ".
     ((false)?"and gamets>".($currentGameTs-(60*60*60*60)):"").
-    " order by gamets desc,ts desc,rowid desc LIMIT 1000 OFFSET 0";
+" order by gamets desc,ts desc,rowid desc LIMIT $nRecordsLimit OFFSET 0";  
     
     $results = $db->fetchAll($query);
 
-    // error_log($query);
+    //error_log($query);
     $rawData=[];
     foreach ($results as $row) {
         $rawData[md5($row["data"].$row["localts"])] = $row;
@@ -510,22 +518,22 @@ function DataLastDataExpandedFor($actor, $lastNelements = -10,$sqlfilter="")
         if ($rowData==="The Narrator:") // Hunt empty rows
             continue;
         
-        $pattern = "/\(Context location: (.*?),(.*?)\)/";
+        $pattern = "/\(Context location: (.*)\)/";
         if ($rowData)
             $rowData = preg_replace($pattern, "", $rowData); // Remove context location if repeated
         
         $printLocation=false;
         
         $string = $row["location"];
-        preg_match('/Context\s*(new\s*)?location:\s*([a-zA-Z\s\'\-]+)(\s*,|$)/', $string, $locationMatch);
-        $location = trim($locationMatch[2]);
-        preg_match('/Hold:\s*([a-zA-Z\s\'\-]+)(\s*|$)/', $string, $holdMatch);
+        preg_match('/Context\s*(new\s*)?location:\s*([^$,]+)/', $string, $locationMatch);
+        preg_match('/Hold:\s*([^$,\)]+)/', $string, $holdMatch);
         
         if (!isset($holdMatch[1])) {
             //error_log(print_r($string,true));
             $locationFinal=$lastlocation;
         } else {
             $hold = trim($holdMatch[1]);
+            $location = trim($locationMatch[2]);
             $locationFinal="$location, hold: $hold";
         }
         
@@ -675,7 +683,7 @@ function DataLastDataExpandedFor($actor, $lastNelements = -10,$sqlfilter="")
 
     foreach ($lastDialogFull as $n => $line) {
 
-        $pattern = '/(\w+), (\d{1,2}:\d{2} (?:AM|PM)), (\d{1,2})(?:st|nd|rd|th) of ([A-Za-z\ ]+), 4E (\d+)/';
+        $pattern = '/(\w+), (\d{1,2}:\d{2} (?:AM|PM)), (\d{1,2})(?:st|nd|rd|th) of ([A-Za-z\'\ ]+), 4E (\d+)/'; //extract also for months with aphostrophe like Sun's Something
         $replacement = 'Day name: $1, Hour: $2, Day Number: $3, Month: $4, 4th Era, Year: $5';
         $result = preg_replace($pattern, $replacement, $line["content"]);
         $lastDialogFull[$n]["content"] = $result;
@@ -871,7 +879,7 @@ function DataLastDataExpandedForBak($actor, $lastNelements = -10,$sqlfilter="")
 
     foreach ($lastDialogFull as $n => $line) {
 
-        $pattern = '/(\w+), (\d{1,2}:\d{2} (?:AM|PM)), (\d{1,2})(?:st|nd|rd|th) of ([A-Za-z\ ]+), 4E (\d+)/';
+        $pattern = '/(\w+), (\d{1,2}:\d{2} (?:AM|PM)), (\d{1,2})(?:st|nd|rd|th) of ([A-Za-z\'\ ]+), 4E (\d+)/'; //extract also for months with aphostrophe like Sun's Something
         $replacement = 'Day name: $1, Hour: $2, Day Number: $3, Month: $4, 4th Era, Year: $5';
         $result = preg_replace($pattern, $replacement, $line["content"]);
         $lastDialogFull[$n]["content"] = $result;
@@ -1031,9 +1039,9 @@ function DataGetCurrentTask()
     foreach ($results as $row) {
 
         if ($n == 0) {
-            $data = "Last task/quest/plan: {$row["description"]}.";
+            $data = "Current plan: {$row["description"]}.";
         } elseif ($n == 1) {
-            $data .= "Previous task/quest/plan: {$row["description"]}.";
+            $data .= "Previous plan: {$row["description"]}.";
         } else {
             break;
         }
@@ -1051,15 +1059,15 @@ function DataGetCurrentTask()
         return $data;
     }
 
-    $data = "";
+    //$data = "";
 
     $n = 0;
     foreach ($results as $row) {
 
         if ($n == 0) {
-            $data = "Current task/quest/plan: {$row["name"]}/{$row["description"]}.";
+            $data .= "Current quest: {$row["name"]}/{$row["description"]}.";
         } elseif ($n == 1) {
-            $data .= "Previous task/quest/plan: {$row["name"]}/{$row["description"]}.";
+            $data .= "Previous quest: {$row["name"]}/{$row["description"]}.";
         } else {
             break;
         }
@@ -1112,13 +1120,17 @@ function DataLastKnowDate()
 
     global $db;
 
-    $lastLoc=$db->fetchAll("select  a.data  as data  FROM  eventlog a  WHERE type in ('infoloc')  order by gamets desc,ts desc LIMIT 1 OFFSET 0");
+    $lastLoc=$db->fetchAll("select  a.data  as data  FROM  eventlog a  WHERE (type in ('infoloc')) and (data like '%Current Date%')  order by gamets desc, ts desc LIMIT 1"); //make sure record has datetime
     if (!is_array($lastLoc) || sizeof($lastLoc)==0) {
         return "";
     }
-    $re = '/(\w+), (\d{1,2}:\d{2} (?:AM|PM)), (\d{1,2})(?:st|nd|rd|th) of ([A-Za-z\ ]+), 4E (\d+)/';
-    preg_match($re, $lastLoc[0]["data"], $matches, PREG_OFFSET_CAPTURE, 0);
-    return $matches[0][0];
+    $re = '/(\w+), (\d{1,2}:\d{2} (?:AM|PM)), (\d{1,2})(?:st|nd|rd|th) of ([A-Za-z\'\ ]+), 4E (\d+)/'; //extract also for months with apostrophe like Sun's Something
+    if (preg_match($re, $lastLoc[0]["data"], $matches, PREG_OFFSET_CAPTURE, 0)) {
+        return $matches[0][0];
+    } else {
+        error_log("DataLastKnowDate: NO match found");
+        return "";
+    }
 
 }
 
@@ -1138,6 +1150,32 @@ function DataLastKnownLocation()
     return $lastLoc[0]["data"];
 
 }
+
+function DataLastKnownLocationHuman($hold=false)
+{
+
+    global $db;
+
+    $lastLoc=$db->fetchAll("select  a.data  as data  FROM  eventlog a  WHERE type in ('infoloc','location') and data like '%(Context%'  order by gamets desc,ts desc LIMIT 1 OFFSET 0");
+    if (!is_array($lastLoc) || sizeof($lastLoc)==0) {
+        return "";
+    }
+    
+    if (!$hold) {
+        $re = '/Context location: ([\w\ \']*)/';
+        preg_match($re, $lastLoc[0]["data"], $matches, PREG_OFFSET_CAPTURE, 0);
+        return $matches[1][0];
+    } else {
+        preg_match('/Hold:\s*(\w+)/', $lastLoc[0]["data"], $matches);
+        if (isset($matches[1]))
+            $hold = $matches[1];
+        else 
+            $hold = "";
+        return $hold;
+    }
+
+}
+
 
 function PackIntoSummary()
 {
@@ -1319,71 +1357,30 @@ function DataBeingsInRange()
     return "|".$beingsFormatted."|";
 }
 
-function GetExpression($mood) {
-   $EXPRESSIONS=[
-    "DialogueAnger",    "DialogueFear",    "DialogueHappy",     "DialogueSad",
-    "DialogueSurprise", "DialoguePuzzled", "DialogueDisgusted", "MoodNeutral",
-    "MoodAnger",        "MoodFear",        "MoodHappy",        "MoodSad",
-    "MoodSurprise",    "MoodPuzzled",    "MoodDisgusted",    "CombatAnger",
-    "CombatShout"
-    ];
+function DataBeingsInCloseRange()
+{
+
+    global $db;
+
+    $lastLoc=$db->fetchAll("select  a.data  as data  FROM  eventlog a  WHERE type in ('infonpc_close')  order by gamets desc,ts desc LIMIT 1 OFFSET 0");
+    if (!is_array($lastLoc) || sizeof($lastLoc)==0) {
+        return "";
+    }
     
-    if ($mood=="sarcastic") {
-        return array_rand(array_flip(["DialoguePuzzled"]), 1);
-        
-        
-    } else if ($mood=="sassy") {
-        return array_rand(array_flip(["DialoguePuzzled"]), 1);
-        
-        
-    } else if ($mood=="sardonic") {
-        return array_rand(array_flip(["DialoguePuzzled"]), 1);
-        
-        
-    } else if ($mood=="irritated") {
-        return array_rand(array_flip(["DialogueAnger"]), 1);
-       
-        
-    } else if ($mood=="mocking") {
-        return array_rand(array_flip(["DialogueHappy"]), 1);
-        
-        
-    } else if ($mood=="playful") {
-        return array_rand(array_flip(["DialogueHappy"]), 1);
+    $beings=strtr($lastLoc[0]["data"],["beings in range:"=>""]);
+    $beingsArray=explode(",",$beings);
+    $beingsArrayNew=[];
+    foreach ($beingsArray as $k=>$v) {
+        if (strpos($v,")")===false) 
+            if (strpos($v,"Horse")!==0) 
+                if (strpos($v,"Chicken")!==0) 
+                    $beingsArrayNew[]=$v;
             
-    } else if ($mood=="teasing") {
-        return array_rand(array_flip(["DialogueSurprise"]), 1);
-        
-        
-    } else if ($mood=="smug") {
-        return array_rand(array_flip(["DialogueAnger"]), 1);
-        
-        
-    } else if ($mood=="amused") {
-        return array_rand(array_flip(["DialogueSurprise"]), 1);
-        
-    } else if ($mood=="smirking") {
-        return array_rand(array_flip(["DialogueHappy"]), 1);
-    
-        
-    } else if ($mood=="serious") {
-        return array_rand(array_flip(["MoodNeutral"]), 1);
-    
-        
-    } else if ($mood=="firm") {
-        return array_rand(array_flip(["MoodNeutral"]), 1);
-    
-        
-    } if ($mood=="neutral") {
-        return array_rand(array_flip(["MoodNeutral"]), 1);
-        
         
     }
-                            
+    $beingsFormatted=implode("|",$beingsArrayNew);
     
-    
-    return "";
-    
+    return "|".$beingsFormatted."|";
 }
 
 function DataSearchMemory($rawstring,$npcfilter) {
@@ -1411,7 +1408,7 @@ function DataSearchMemory($rawstring,$npcfilter) {
         
         //print_r($reponse);
         
-        if ($reponse["is_memory_recall"]=="No") {
+        if (isset($reponse["is_memory_recall"]) && $reponse["is_memory_recall"]=="No") {
              $GLOBALS["db"]->insert(
                 'audit_memory',
                 array(
@@ -1628,6 +1625,25 @@ function GetAnimationHex($mood)
         
     ];
     
+    $animationsDb=$GLOBALS["db"]->fetchAll("select animations from animations_custom where mood ilike '%$mood%'");
+    foreach ($animationsDb as $an) {
+        $candidates=explode(",", $an["animations"]);
+        if (is_array($candidates)) {
+            return $candidates[array_rand($candidates)];
+        }
+
+    }
+
+    $animationsDb=$GLOBALS["db"]->fetchAll("select animations from animations where mood ilike '%$mood%'");
+    foreach ($animationsDb as $an) {
+        $candidates=explode(",", $an["animations"]);
+        if (is_array($candidates)) {
+            return $candidates[array_rand($candidates)];
+        }
+
+    }
+
+
     if ($mood=="sarcastic") {
         return array_rand(array_flip([$ANIMATIONS["SarcasticMove"],$ANIMATIONS["CleanSweat"],$ANIMATIONS["Agitated"],$ANIMATIONS["ApplauseSarcastic"]]), 1);
         
@@ -1649,7 +1665,7 @@ function GetAnimationHex($mood)
         
         
     } else if ($mood=="playful") {
-        return array_rand(array_flip([$ANIMATIONS["Cheer"],$ANIMATIONS["HappyDialogue"]]), 1);
+        return array_rand(array_flip([$ANIMATIONS["Cheer"],$ANIMATIONS["HappyDialogue"],$ANIMATIONS["Positive"]]), 1);
             
     } else if ($mood=="teasing") {
         return array_rand(array_flip([$ANIMATIONS["NervousDialogue"],$ANIMATIONS["NervousDialogue1"],$ANIMATIONS["NervousDialogue2"],$ANIMATIONS["NervousDialogue3"]]), 1);
@@ -1680,24 +1696,103 @@ function GetAnimationHex($mood)
         
     } else if ($mood=="drunk") {
         // No animation :(
-        $GLOBALS["TTS_FFMPEG_FILTERS"]='-filter:a "atempo=0.6"';
+        error_log("Using filter for mood drunk");
+        $GLOBALS["TTS_FFMPEG_FILTERS"]["tempo"]='atempo=0.65';
+        return "DrunkStart";
         
     } else if ($mood=="high") {
         // No animation :(
-        $GLOBALS["TTS_FFMPEG_FILTERS"]='-filter:a "atempo=1.45"';
+        $GLOBALS["TTS_FFMPEG_FILTERS"]["tempo"]='atempo=1.45';
         
-    }
-                            
+    } 
+                      
     
     
     return "";
 
 }
 
+
+function GetExpression($mood) {
+    $EXPRESSIONS=[
+     "DialogueAnger",    "DialogueFear",    "DialogueHappy",     "DialogueSad",
+     "DialogueSurprise", "DialoguePuzzled", "DialogueDisgusted", "MoodNeutral",
+     "MoodAnger",        "MoodFear",        "MoodHappy",        "MoodSad",
+     "MoodSurprise",    "MoodPuzzled",    "MoodDisgusted",    "CombatAnger",
+     "CombatShout"
+     ];
+     
+     if ($mood=="sarcastic") {
+         return array_rand(array_flip(["DialoguePuzzled"]), 1);
+         
+         
+     } else if ($mood=="sassy") {
+         return array_rand(array_flip(["DialoguePuzzled"]), 1);
+         
+         
+     } else if ($mood=="sardonic") {
+         return array_rand(array_flip(["DialoguePuzzled"]), 1);
+         
+         
+     } else if ($mood=="irritated") {
+         return array_rand(array_flip(["DialogueAnger"]), 1);
+        
+         
+     } else if ($mood=="mocking") {
+         return array_rand(array_flip(["DialogueHappy"]), 1);
+         
+         
+     } else if ($mood=="playful") {
+         return array_rand(array_flip(["DialogueHappy"]), 1);
+             
+     } else if ($mood=="teasing") {
+         return array_rand(array_flip(["DialogueSurprise"]), 1);
+         
+         
+     } else if ($mood=="smug") {
+         return array_rand(array_flip(["DialogueAnger"]), 1);
+         
+         
+     } else if ($mood=="amused") {
+         return array_rand(array_flip(["DialogueSurprise"]), 1);
+         
+     } else if ($mood=="smirking") {
+         return array_rand(array_flip(["DialogueHappy"]), 1);
+     
+         
+     } else if ($mood=="serious") {
+         return array_rand(array_flip(["MoodNeutral"]), 1);
+     
+         
+     } else if ($mood=="firm") {
+         return array_rand(array_flip(["MoodNeutral"]), 1);
+     
+         
+     } if ($mood=="neutral") {
+         return array_rand(array_flip(["MoodNeutral"]), 1);
+         
+         
+     }
+                             
+     
+     
+     return "";
+     
+ }
+
+ 
 function isOk($arr) {
     if (is_array($arr))
         if (sizeof($arr)>0)
             return true;
+
+    return false;
+}
+
+function getArrayKey($arr,$key) {
+    if (is_array($arr))
+        if (isset($arr[$key]))
+            return $arr[$key];
 
     return false;
 }
@@ -1709,7 +1804,7 @@ function profile_exists($npcname) {
 }
 
 function createProfile($npcname,$FORCE_PARMS=[],$overwrite=false) {
-
+   
     global $db; 
 
     if ($npcname=="The Narrator")   // Refuse to add Narrator
@@ -1718,15 +1813,23 @@ function createProfile($npcname,$FORCE_PARMS=[],$overwrite=false) {
     $path = dirname((__FILE__)) . DIRECTORY_SEPARATOR."..".DIRECTORY_SEPARATOR;
     $newConfFile=md5($npcname);
 
-    $codename=strtr(strtolower(trim($npcname)),[" "=>"_","'"=>"+"]);
-    $cn=$db->escape("Voicetype/$codename");
-    $vtype=$db->fetchAll("select value from conf_opts where id='$cn'");
-    $voicetypeString=(isOk($vtype))?$vtype[0]["value"]:null;
-    $voicetype=explode("\\",$voicetypeString);
+    $codename = npcNameToCodename($npcname);
+    
+   
 
     if (!file_exists($path . "conf".DIRECTORY_SEPARATOR."conf_$newConfFile.php") || $overwrite) {
         
         error_log("Overwritting conf");
+        sleep (1);
+        $cn=$db->escape("Voicetype/$codename");
+        $vtype=$db->fetchAll("select value from conf_opts where id='$cn'");
+        $voicetypeString=(isOk($vtype))?$vtype[0]["value"]:null;
+        $voicetype=explode("\\",$voicetypeString);
+    
+        $xttsid=$db->fetchAll("SELECT xtts_voiceid FROM combined_npc_templates WHERE npc_name='$codename'");
+        $melottsid=$db->fetchAll("SELECT melotts_voiceid FROM combined_npc_templates WHERE npc_name='$codename'");
+        $xvasnythid=$db->fetchAll("SELECT xvasynth_voiceid	 FROM combined_npc_templates WHERE npc_name='$codename'");
+
         // Do customizations here
         $newFile=$path . "conf".DIRECTORY_SEPARATOR."conf_$newConfFile.php";
         copy($path . "conf".DIRECTORY_SEPARATOR."conf.php",$newFile);
@@ -1743,25 +1846,114 @@ function createProfile($npcname,$FORCE_PARMS=[],$overwrite=false) {
             unset($file_lines[$i]);
         }
         
-        $npcTemlate=$db->fetchAll("SELECT npc_pers FROM combined_npc_templates where npc_name='$codename'");
-        
-        // Consider adding here notes like 'They Just met' into profile.
+        if (empty($GLOBALS["CORE_LANG"])) {
+            $npcTemlate=$db->fetchAll("SELECT npc_pers FROM combined_npc_templates where npc_name='$codename'");
+            $npcdynamic=$db->fetchAll("SELECT npc_dynamic FROM combined_npc_templates where npc_name='$codename'");
+        } else {
+            error_log("Using npc_templates_trl, name_trl='$codename' and lang='{$GLOBALS["CORE_LANG"]}'");
+            $npcTemlate=$db->fetchAll("SELECT npc_pers FROM npc_templates_trl where name_trl='$codename' and lang='{$GLOBALS["CORE_LANG"]}'");
+            if (!isset($npcTemlate[0])) {
+                error_log("No trl found, using standard template");
+                $npcTemlate=$db->fetchAll("SELECT npc_pers FROM combined_npc_templates where npc_name='$codename'");
+                $npcdynamic=$db->fetchAll("SELECT npc_dynamic FROM combined_npc_templates where npc_name='$codename'");
+            }
+        }
         
 
+        $voicelogic = $GLOBALS["TTS"]["XTTSFASTAPI"]["voicelogic"];
+        //use the Nametype conf opts to latch onto the character name while still being able to pull the correct voicetype[3]
+        if ($voicelogic === "voicetype") {
+            $codename = npcNameToCodename($npcname);
+            $cn=$db->escape("Nametype/$codename");
+            $vtype=$db->fetchAll("select value from conf_opts where id='$cn'");
+            $voicetypeString=(isOk($vtype))?$vtype[0]["value"]:null;
+            $voicetype=explode("\\",$voicetypeString);
+        }
+
+        // 1. Save the file lines
         file_put_contents($newFile, implode('', $file_lines));
-        file_put_contents($newFile, '$TTS["XTTSFASTAPI"]["voiceid"]=\''.$codename.'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
-        file_put_contents($newFile, '$TTS["MELOTTS"]["voiceid"]=\''.strtolower($voicetype[3]).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
-        file_put_contents($newFile, '$TTS["XVASYNTH"]["model"]=\'sk_' . strtolower(str_replace(['maleunique', 'femaleunique'], '', $voicetype[3])) . '\';' . PHP_EOL, FILE_APPEND | LOCK_EX);
+        // 2. Save the original $npcname to HERIKA_NAME
         file_put_contents($newFile, '$HERIKA_NAME=\''.addslashes(trim($npcname)).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
         
-        if (is_array($npcTemlate[0]))
-            file_put_contents($newFile, '$HERIKA_PERS=\''.addslashes(trim($npcTemlate[0]["npc_pers"])).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
-        else
-            file_put_contents($newFile, '$HERIKA_PERS=\'Roleplay as '.addslashes(trim($npcname)).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
 
+        // 3. Extract the bracketed portion and convert it to the "stripped" version
+        //    e.g. Bofesar [Whiterun Guard] -> whiterun_guard
+        $bracketMatch = '';
+        if (preg_match('/\[(.*?)\]/', $npcname, $matches)) {
+            $bracketMatch = trim($matches[1]);    // remove possible extra spaces
+            $bracketMatch = strtolower($bracketMatch);
+            $bracketMatch = str_replace(' ', '_', $bracketMatch);
+        }
+        
+        // Original logic for pulling from database
+        if (isset($npcTemlate[0]) && is_array($npcTemlate[0])) {
+
+            file_put_contents($newFile, '$HERIKA_PERS=\''.addslashes(trim($npcTemlate[0]["npc_pers"])).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
+            file_put_contents($newFile, '$HERIKA_DYNAMIC=\''.addslashes(trim($npcdynamic[0]["npc_dynamic"])).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
+
+            // RealNamesExtended support for generic npcs
+        } elseif (!empty($bracketMatch)) {
+            // 4. Query #2: Try bracket-stripped match only if Query #1 was empty
+            $npcTemlate2 = $db->fetchAll("SELECT npc_pers 
+                                        FROM combined_npc_templates
+                                        WHERE npc_name='{$bracketMatch}'");
+
+            if (!empty($npcTemlate2[0])) {
+                // Found a row by bracket match
+                file_put_contents($newFile,'$HERIKA_PERS=\''.addslashes(trim($npcTemlate2[0]["npc_pers"])).'\';'.PHP_EOL,FILE_APPEND | LOCK_EX);
+                $dynamicPrompts = include 'prompts/dynamic_prompts.php'; // Ensure this returns an array
+                file_put_contents($newFile, '$HERIKA_DYNAMIC=\''.addslashes(trim($dynamicPrompts[array_rand($dynamicPrompts)])).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
+
+            } else {
+                // Fallback if neither query found anything
+                file_put_contents($newFile,'$HERIKA_PERS=\'Roleplay as '.addslashes($npcname).'\';'.PHP_EOL,FILE_APPEND | LOCK_EX);
+                $dynamicPrompts = include 'prompts/dynamic_prompts.php'; // Ensure this returns an array
+                file_put_contents($newFile, '$HERIKA_DYNAMIC=\''.addslashes(trim($dynamicPrompts[array_rand($dynamicPrompts)])).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
+
+            }
+
+        } else {
+            // 5. Fallback if no bracket or no match found
+            file_put_contents($newFile,'$HERIKA_PERS=\'Roleplay as '.addslashes($npcname).'\';'.PHP_EOL,FILE_APPEND | LOCK_EX);
+        }
+
+            
         foreach ($FORCE_PARMS as $p=>$v) {
             file_put_contents($newFile, '$'.$p.'=\''.addslashes($v).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
         }
+
+        // XTTS voiceid override from table. if fails then xtts voicelogic pick
+        if (!empty($xttsid[0]['xtts_voiceid'])) {
+            file_put_contents(
+                $newFile,
+                '$TTS["XTTSFASTAPI"]["voiceid"]=\'' . $xttsid[0]['xtts_voiceid'] . '\';' . PHP_EOL,
+                FILE_APPEND | LOCK_EX
+            );
+        } else {
+            if ($voicelogic === "voicetype") {
+                file_put_contents($newFile, '$TTS["XTTSFASTAPI"]["voiceid"]=\'' . strtolower($voicetype[3]) . '\';' . PHP_EOL, FILE_APPEND | LOCK_EX);
+            } else {
+                file_put_contents($newFile, '$TTS["XTTSFASTAPI"]["voiceid"]=\'' . $codename . '\';' . PHP_EOL, flags: FILE_APPEND | LOCK_EX);
+            }
+        }
+        // MeloTTS voiceid override from table, if fails then generated normally.
+        if (!empty($melottsid[0]['melotts_voiceid'])) {
+            // Use the melotts_voiceid value
+            file_put_contents($newFile,'$TTS["MELOTTS"]["voiceid"]=\'' . strtolower($melottsid[0]['melotts_voiceid']) . '\';' . PHP_EOL,FILE_APPEND | LOCK_EX);
+        } else {
+            file_put_contents($newFile, '$TTS["MELOTTS"]["voiceid"]=\''.strtolower($voicetype[3]).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
+        }
+
+        //xvansynth logic from override table
+        if (!empty($xvasynthid[0]['xvasynth_voiceid'])) {
+
+            file_put_contents($newFile,'$TTS["XVASYNTH"]["model"]=\'' . strtolower($xvasnythid[0]['xvasynth_voiceid']) . '\';' . PHP_EOL,FILE_APPEND | LOCK_EX);
+        }
+        else {
+            file_put_contents($newFile, '$TTS["XVASYNTH"]["model"]=\'sk_' . strtolower($voicetype[3]).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
+        }
+
+
         file_put_contents($newFile, '?>'.PHP_EOL, FILE_APPEND | LOCK_EX);
 
         error_log(DMgetCurrentModelFile()." ".$path."data/CurrentModel_".md5($npcname).".json");
@@ -1790,7 +1982,7 @@ function getConfFileFor($npcname) {
     $path = dirname((__FILE__)) . DIRECTORY_SEPARATOR."..".DIRECTORY_SEPARATOR;
     $newConfFile=md5($npcname);
 
-    $codename=strtr(strtolower(trim($npcname)),[" "=>"_","'"=>"+"]);
+    
     return $path . "conf".DIRECTORY_SEPARATOR."conf_$newConfFile.php";
     
 }

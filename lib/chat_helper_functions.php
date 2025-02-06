@@ -81,7 +81,7 @@ function cleanResponse($rawResponse)
 
     $sentences = split_sentences($toSplit);
 
-    $sentence = trim((implode(".", $sentences)));
+    $sentence = trim((implode(" ", $sentences)));
 
     $sentenceX = strtr(
         $sentence,
@@ -91,14 +91,22 @@ function cleanResponse($rawResponse)
     );
 
     // Strip no ascii.
+    /*
     $sentenceXX = str_replace(
         array('á', 'é', 'í', 'ó', 'ú', 'Á', 'É', 'Í', 'Ó', 'Ú', '¿', '¡'),
         array('a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U', '', ''),
         $sentenceX
     );
+    */
 
+    // convert to half-width numbers (to avoid display issues with japanese font)
+    $sentenceXX = str_replace(
+        array('１', '２', '３', '４', '５', '６', '７', '８', '９', '０'),
+        array('1', '2', '3', '4', '5', '6', '7', '8', '9', '0'),
+        $sentenceX
+    );
 
-    return $sentenceXX;
+    return $sentenceX;
 }
 
 function findDotPosition($string)
@@ -132,25 +140,28 @@ function split_sentences($paragraph)
     }
     
     $paragraphNcr = br2nl($paragraph); // Some BR detected sometimes in response
-    // Split the paragraph into an array of sentences using a regular expression
-    preg_match_all('/[^\n?.!]+[?.!]/', $paragraphNcr, $matches);
-    //print_r($matches);
-    $sentences = $matches[0];
-    // Check if the last sentence is truncated (i.e., doesn't end with a period)
-    /*$last_sentence = end($sentences);
-    if (!preg_match('/[.?|]$/', $last_sentence)) {
-        // Remove the last sentence if it's truncated
-        array_pop($sentences);
-    }*/
 
-    if (is_array($sentences)) {
-        /*if (sizeof($sentences)==0)
-             return array($paragraphNcr);
-        else*/
-        return $sentences;
-    } else {
-        return array($sentences);
+    $eosPunc = preg_quote(getEndOfSentencePunctuation(), '/');
+    $splitSentenceRegex = "/[^\n" . $eosPunc . "]+[" . $eosPunc . "]/u";
+    $sentences = preg_split($splitSentenceRegex, $paragraphNcr, PREG_SPLIT_NO_EMPTY);
+
+    // remove matched strings from the original paragraph in case the end of the paragraph didn't end with punctuation
+    foreach ($sentences as $sentence) {
+        $position = strpos($paragraph, $sentence);
+        if ($position !== false) {
+            $paragraph = substr_replace($paragraph, '', $position, strlen($sentence));
+        }
     }
+
+    // clean the remaining paragraph after matched parts were removed
+    $paragraph=trim($paragraph);
+    $paragraph=preg_replace('/^[\p{P}|\s]+/u', '', $paragraph);
+
+    if ($paragraph) {
+        $sentences[]=$paragraph;
+    }
+
+    return $sentences;
 }
 
 function checkOAIComplains($responseTextUnmooded)
@@ -230,17 +241,35 @@ function split_sentences_stream($paragraph)
         return [$paragraph];
     }
 
-    $sentences = preg_split('/(?<=[.!?])\s+/', $paragraph, -1, PREG_SPLIT_NO_EMPTY);
+    $eosPunc = preg_quote(getEndOfSentencePunctuation(), '/');
+    $splitSentenceRegex = "/(?<=[" . $eosPunc . "])[\p{P}]?[\s+]?/u";
+    $sentences = preg_split($splitSentenceRegex, $paragraph, -1, PREG_SPLIT_NO_EMPTY);
+
+    // remove matched strings from the original paragraph in case the end of the paragraph didn't end with punctuation
+    foreach ($sentences as $sentence) {
+        $position = strpos($paragraph, $sentence);
+        if ($position !== false) {
+            $paragraph = substr_replace($paragraph, '', $position, strlen($sentence));
+        }
+    }
+
+    // clean the remaining paragraph after matched parts were removed
+    $paragraph=trim($paragraph);
+    $paragraph=preg_replace('/^[\p{P}|\s]+/u', '', $paragraph);
+
+    if ($paragraph) {
+        $sentences[]=$paragraph;
+    }
 
     $splitSentences = [];
     $currentSentence = '';
 
     foreach ($sentences as $sentence) {
         $currentSentence .= ' ' . $sentence;
-        if (strlen($currentSentence) > 120) {
+        if (strlen($currentSentence) > MAXIMUM_SENTENCE_SIZE) {
             $splitSentences[] = trim($currentSentence);
             $currentSentence = '';
-        } elseif (strlen($currentSentence) >= 60 && strlen($currentSentence) <= MAXIMUM_SENTENCE_SIZE) {
+        } elseif (strlen($currentSentence) >= MINIMUM_SENTENCE_SIZE && strlen($currentSentence) <= MAXIMUM_SENTENCE_SIZE) {
             $splitSentences[] = trim($currentSentence);
             $currentSentence = '';
         }
@@ -250,10 +279,16 @@ function split_sentences_stream($paragraph)
         $splitSentences[] = trim($currentSentence);
     }
 
-    error_log("<$paragraph> => ".implode("|", $splitSentences));
+    // error_log("<$paragraph> => ".implode("|", $splitSentences));
     return $splitSentences;
 }
 
+function getEndOfSentencePunctuation() {
+    $en='.?!';
+    $cjk='。？！';
+
+    return $en.$cjk;
+}
 
 function returnLines($lines,$writeOutput=true)
 {
@@ -269,7 +304,10 @@ function returnLines($lines,$writeOutput=true)
             return;
         
         // Remove actions
-        $elapsedTimeAI= microtime(true) - $startTime;
+        if (isset($GLOBALS["startTimeAfterPlayerTTTS"]))
+            $elapsedTimeAI= microtime(true) - $GLOBALS["startTimeAfterPlayerTTTS"];
+        else
+            $elapsedTimeAI= microtime(true) - $startTime;
         //error_log("PRE LLM STATUS DONE 2: ". (microtime(true) - $startTime));
 
         $pattern = '/<[^>]+>/';
@@ -297,8 +335,8 @@ function returnLines($lines,$writeOutput=true)
         $sentence=$output;
         $output = strtr($sentence,[
                         "*Smirks*"=>"","*smirks*"=>"",
-                        "*winks*"=>"","*wink*"=>"","*smirk*"=>"","*gasps*"=>"",
-                        "*gasp*"=>"","*moans*"=>"","*whispers*"=>"","*moan*"=>"",
+                        "*winks*"=>"","*wink*"=>"","*smirk*"=>"","*gasps*"=>"","*chuckles*"=>"","*giggles*"=>"","*laughs*"=>"",
+                        "*gasp*"=>"","*moans*"=>"","*whispers*"=>"","*moan*"=>"","#SpeechStyle"=>"","#SpeechStyle:"=>"",
                         "*pant*"=>"",
                         "*cough*"=>"",
                         "*hiccup*"=>"",
@@ -370,6 +408,22 @@ function returnLines($lines,$writeOutput=true)
 
         // $responseText=translate($responseTextUnmooded,'ES','EN');
 
+        if (isset($GLOBALS["FEATURES"]["MISC"]["TTS_RANDOM_PITCH"])&&($GLOBALS["FEATURES"]["MISC"]["TTS_RANDOM_PITCH"])) {
+            $random_per_character=sprintf('%u', crc32($GLOBALS["HERIKA_NAME"])); // Unsigned integer
+            $pitch=$random_per_character%5;
+
+            if ($pitch==0)
+                $GLOBALS["TTS_FFMPEG_FILTERS"]["rubberband"]="rubberband=pitch=1.02";
+            if ($pitch==1)
+                $GLOBALS["TTS_FFMPEG_FILTERS"]["rubberband"]="rubberband=pitch=0.98";
+            if ($pitch==2)
+                $GLOBALS["TTS_FFMPEG_FILTERS"]["rubberband"]="rubberband=pitch=1.01";
+            if ($pitch==3)
+                $GLOBALS["TTS_FFMPEG_FILTERS"]["rubberband"]="rubberband=pitch=0.99";
+            if ($pitch==4)
+                ;
+        }
+
         if ($responseText) {
             if ($GLOBALS["TTSFUNCTION"] == "azure") {
 
@@ -426,7 +480,11 @@ function returnLines($lines,$writeOutput=true)
                 require_once(__DIR__."/../tts/tts-stylettsv2-2.php");
                 $ttsOutput=$GLOBALS["TTS_IN_USE"]($responseTextUnmooded, $mood, $responseText);
 
-            } else {
+            } else if ($GLOBALS["TTSFUNCTION"] == "koboldcpp") {
+                require_once(__DIR__."/../tts/tts-koboldcpp.php");
+                $ttsOutput=$GLOBALS["TTS_IN_USE"]($responseTextUnmooded, $mood, $responseText);
+            } 
+            else {
                 if (file_exists(__DIR__."/../tts/tts-".$GLOBALS["TTSFUNCTION"].".php")) {
                     require_once(__DIR__."/../tts/tts-".$GLOBALS["TTSFUNCTION"].".php");
                     $ttsOutput=$GLOBALS["TTS_IN_USE"]($responseTextUnmooded, $mood, $responseText);
@@ -442,6 +500,7 @@ function returnLines($lines,$writeOutput=true)
             }
         }
 
+        error_log("Speech sent for {$GLOBALS["HERIKA_NAME"]}, generator {$GLOBALS["TTSFUNCTION"]}, size: ".strlen($responseText). "  '".substr($responseText,0,10)."'");
         $elapsedTimeTTS=microtime(true) - $startTime;
 
         $outBuffer = array(
@@ -455,7 +514,8 @@ function returnLines($lines,$writeOutput=true)
         
         
         $GLOBALS["DEBUG"]["BUFFER"][] = "{$outBuffer["actor"]}|{$outBuffer["action"]}|$responseText\r\n";
-        
+       
+
         if ($writeOutput) {
             //if (isset($GLOBALS["NEWQUEUE"]) && $GLOBALS["NEWQUEUE"]) {
             if (true) {
@@ -605,6 +665,105 @@ function lastNames($n, $eventypes)
     } else {
         return "";
     }
+}
+
+
+function lastSpeech($npcname)
+{
+
+    global $db;
+    
+    
+    $speaker=$db->escape($npcname);
+    $pj=$GLOBALS["PLAYER_NAME"];
+    $lastRecords = $db->fetchAll("SELECT * from speech where (speaker ilike '$speaker' or speaker ilike '%$pj%' ) order by rowid desc LIMIT 5 OFFSET 0");
+    $buffer="";
+    foreach (array_reverse($lastRecords) as $record) {
+        $buffer.="{$record["speaker"]}:{$record["speech"]}\n";
+        
+    }
+    
+    return $buffer;
+    
+
+}
+
+function lastKeyWordsContext($n, $npcname='')
+{
+
+    global $db;
+    
+    $m=$n+1;
+    $speaker=$db->escape($npcname);
+    $pj=$GLOBALS["PLAYER_NAME"];
+
+    $lastRecords = $db->fetchAll("SELECT speaker,location,companions,speech from speech where (speaker ilike '$speaker' or speaker ilike '%$pj%' ) 
+        order by gamets desc limit $m offset 0");
+    $words=[];
+    $uniqueArray=[];
+    $uppercaseWords = [];
+    foreach ($lastRecords as $record) {
+        $pattern = '/[A-Za-z\-]{4,}/';
+        $matches=[];
+        preg_match_all($pattern,  $record["speech"],$matches);
+        $uppercaseWords1 = array_merge($uppercaseWords, $matches[0]);
+
+        // Get words>4 chars starting with upercase, not in the beginning of string and not after .?
+        $pattern = '/(?<!^|[.?]\s)(\b[A-Z][a-zA-Z\-]{4,}\b)/';
+        $matches=[];
+        preg_match_all($pattern,  $record["speech"],$matches);
+        $uppercaseWords = array_merge($uppercaseWords1, $matches[0]);
+
+    }
+    foreach ($uppercaseWords as $n=>$e) {
+        if (stripos($e, $GLOBALS["PLAYER_NAME"])!==false) {
+          
+        } else if (stripos($e, $GLOBALS["HERIKA_NAME"])!==false) {
+            
+        } else {
+            if (!isset($words[$e]))
+                $words[$e]=0;
+            $words[$e]++;
+            if ( preg_match('~^\p{Lu}~u', $e) ) {
+                $words[$e]++;
+                
+            }
+
+            
+        }
+        
+    }
+
+    function startsWithUppercase($string) {
+        return preg_match('/^[A-Z]/', $string);
+    }
+
+    unset($words["Yeah"]);
+    unset($words["Wouldn"]);
+    unset($words["What"]);
+    unset($words["Well"]);
+    unset($words["Those"]);
+    unset($words["This"]);
+    unset($words["These"]);
+    unset($words["There"]);
+    unset($words["That"]);
+    unset($words["Seems"]);
+    unset($words["Shall"]);
+    unset($words["Maybe"]);
+    unset($words["Looks"]);
+    unset($words["Just"]);
+    
+    
+    foreach ($words as $n=>$e) {
+        if ($e>1)
+           if (startsWithUppercase($n))
+                $uniqueArray[]=$n;
+    }
+    $GLOBALS["DEBUG_DATA"]["textToEmbedFinalKwywords"]=implode(" ",$uniqueArray);
+    
+    rsort($uniqueArray);
+    return $uniqueArray;
+    
 }
 
 function lastKeyWordsNew($n, $eventypes='')

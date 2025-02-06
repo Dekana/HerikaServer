@@ -112,15 +112,21 @@ Note: Memories are stored in memory_summary table, which holds info from events/
 				$gameRequest=["summary"];	// Fake a diary call.
 				
 				$CLFORMAT="#Summary: {summary of events and dialogues}\r\n#Tags: {list of relevant twitter-like hashtags}";
+                IF (isset($GLOBALS["CORE_LANG"])) {
+                    if ($GLOBALS["CORE_LANG"]=="es") {
+                        $CLFORMAT.=" GENERA EL CONTENIDO Y LOS TAGS EN ESPAÑOL";
+                    }
+                    
+                }
 				$prompt=[];
                 
                 $prompt[] = array('role' => 'system', 
-								  'content' => "This is a playthrough in Skyrim universe. 
+								  'content' => "This is a playthrough in Skyrim. 
 {$GLOBALS["PLAYER_NAME"]} is the player.
 {$row["companions"]} are {$GLOBALS["PLAYER_NAME"]}'s followers/companions.
-You must write {$GLOBALS["PLAYER_NAME"]} memories by analyzing chat history.
-Pay attention to details that can change character's behaviour, feelings,also tag names and locations.
-{$GLOBALS["SUMMARY_PROMPT"]}
+You must write {$GLOBALS["PLAYER_NAME"]} memories by analyzing the chat history.
+Pay attention to details that can change character's behavior, feelings, and also tag names and locations.
+Here are additional instructions: {$GLOBALS["SUMMARY_PROMPT"]}
 ");
                 
                 $prompt[] = array('role' => 'user', 'content' =>"

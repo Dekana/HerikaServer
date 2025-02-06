@@ -49,86 +49,36 @@ class connector
         
         if (isset($GLOBALS["FEATURES"]["MEMORY_EMBEDDING"]["ENABLED"]) && $GLOBALS["FEATURES"]["MEMORY_EMBEDDING"]["ENABLED"] && isset($GLOBALS["MEMORY_STATEMENT"]) ) {
             foreach ($contextData as $n=>$contextline)  {
-                if (strpos($contextline["content"],"#MEMORY")===0) {
-                    $contextData[$n]["content"]=str_replace("#MEMORY","##\nMEMORY\n",$contextline["content"]."\n##\n");
-                } else if (strpos($contextline["content"],$GLOBALS["MEMORY_STATEMENT"])!==false) {
-                    $contextData[$n]["content"]=str_replace($GLOBALS["MEMORY_STATEMENT"],"(USE MEMORY reference)",$contextline["content"]);
+                if (is_array($contextline)) {
+                    if (strpos($contextline["content"],"#MEMORY")===0) {
+                        $contextData[$n]["content"]=str_replace("#MEMORY","##\nMEMORY\n",$contextline["content"]."\n##\n");
+                    } else if (strpos($contextline["content"],$GLOBALS["MEMORY_STATEMENT"])!==false) {
+                        $contextData[$n]["content"]=str_replace($GLOBALS["MEMORY_STATEMENT"],"(USE MEMORY reference)",$contextline["content"]);
+                    }
                 }
             }
         }
-        
-        
-        
-         $FUNC_LIST[]="Talk";
-         if (isset($GLOBALS["FUNCTIONS_ARE_ENABLED"]) && $GLOBALS["FUNCTIONS_ARE_ENABLED"]) {
-            $contextData[0]["content"].="\nAVAILABLE ACTION: Talk";
-            foreach ($GLOBALS["FUNCTIONS"] as $function) {
-                //$data["tools"][]=["type"=>"function","function"=>$function];
-                if (strpos($function["name"],"Attack")!==false) {   // Every command starting with Attack
-                    $contextData[0]["content"].="\nAVAILABLE ACTION: {$function["name"]} : {$function["description"]}";
-                    $contextData[0]["content"].="(available targets: ".implode(",",$GLOBALS["FUNCTION_PARM_INSPECT"]).")";
-                } /*else if ($function["name"]==$GLOBALS["F_NAMES"]["SetSpeed"]) {
-                    $contextData[0]["content"].="\nAVAILABLE ACTION: {$function["name"]}(available speeds: run|fastwalk|jog|walk) ";
-                    $contextData[0]["content"].="({$function["description"]})";
-                }*/  else if ($function["name"]==$GLOBALS["F_NAMES"]["SearchMemory"]) {
-                    $contextData[0]["content"].="\nAVAILABLE ACTION: {$function["name"]} : {$function["description"]})";
-                 
-                } else
-                    $contextData[0]["content"].="\nAVAILABLE ACTION: {$function["name"]} : {$function["description"]}";
-                
-                $FUNC_LIST[]=$function["name"];
-            }
-            
-            
 
+        require_once(__DIR__.DIRECTORY_SEPARATOR."..".DIRECTORY_SEPARATOR."functions".DIRECTORY_SEPARATOR."json_response.php");
+
+        if (isset($GLOBALS["FUNCTIONS_ARE_ENABLED"]) && $GLOBALS["FUNCTIONS_ARE_ENABLED"]) {
+            $contextData[0]["content"].=$GLOBALS["COMMAND_PROMPT"];
         }
-        
+
         if (isset($GLOBALS["PATCH_PROMPT_ENFORCE_ACTIONS"]) && $GLOBALS["PATCH_PROMPT_ENFORCE_ACTIONS"]) {
             $prefix="{$GLOBALS["COMMAND_PROMPT_ENFORCE_ACTIONS"]}";
         }
         $prefix="{$GLOBALS["COMMAND_PROMPT_ENFORCE_ACTIONS"]}";
 
-        //$FUNC_LIST[]="None";
-        shuffle($FUNC_LIST);
-        
-        $moods=explode(",",$GLOBALS["EMOTEMOODS"]);
-        shuffle($moods);
-        
-        
-        if (isset($GLOBALS["LANG_LLM_XTTS"])&&($GLOBALS["LANG_LLM_XTTS"])) {
-            $formatJsonTemplate= [
-            'role' => 'user', 
-            'content' => "{$prefix}Use this JSON object to give your answer: ".json_encode([
-                "character"=>$GLOBALS["HERIKA_NAME"],
-                "listener"=>"specify who {$GLOBALS["HERIKA_NAME"]} is talking to",
-                "mood"=>implode("|",$moods),
-                "action"=>implode("|",$FUNC_LIST),
-                "target"=>"action's target|destination name",
-                "lang"=>"en|es",
-                "message"=>'dialogues lines',
-                
-            ])
-            ];
-            
-        } else {
-        
-            $formatJsonTemplate= [
-                'role' => 'user', 
-                'content' => "{$prefix}Use this JSON object to give your answer: ".json_encode([
-                    "character"=>$GLOBALS["HERIKA_NAME"],
-                    "listener"=>"specify who {$GLOBALS["HERIKA_NAME"]} is talking to",
-                    "mood"=>implode("|",$moods),
-                    "action"=>implode("|",$FUNC_LIST),
-                    "target"=>"action's target|destination name",
-                    "message"=>'dialogues lines',
-                    
-                    
-            ])
-            ];
-        }
-       
-        
-        $contextData[]=$formatJsonTemplate;
+        if (strpos($GLOBALS["HERIKA_PERS"],"#SpeechStyle")!==false) {
+            $speechReinforcement="Use #SpeechStyle.";
+        } else
+            $speechReinforcement="";
+
+        $contextData[]=[
+            'role' => 'user',
+            'content' => "{$prefix}. $speechReinforcement Use this JSON object to give your answer: ".json_encode($GLOBALS["responseTemplate"])
+        ];
         $pb=[];
         $pb["user"]="";
       
@@ -140,6 +90,11 @@ class connector
         $assistantRoleBuffer="";
         foreach ($contextDataOrig as $n=>$element) {
             
+            if (!is_array($element)) {
+                error_log("Warning: $n=>$element was not an array");
+                continue;
+
+            }
             
             if ($n>=(sizeof($contextDataOrig)-1) && $element["role"]!="tool") {
                 // Last element
@@ -336,7 +291,11 @@ class connector
          $data["top_p"]=$GLOBALS["CONNECTOR"][$this->name]["top_p"]+0;
          
          if ($GLOBALS["CONNECTOR"][$this->name]["ENFORCE_JSON"]) {
-            $data["response_format"]=["type"=>"json_object"];
+            if (isset($GLOBALS["CONNECTOR"][$this->name]["json_schema"]) && $GLOBALS["CONNECTOR"][$this->name]["json_schema"]) {
+                $data["response_format"]=$GLOBALS["structuredOutputTemplate"];
+            } else {
+                $data["response_format"]=["type"=>"json_object"];
+            }
          }
         
             
@@ -376,7 +335,7 @@ class connector
 
         $GLOBALS["DEBUG_DATA"]["full"]=($data);
 
-        file_put_contents(__DIR__."/../log/context_sent_to_llm.log",date(DATE_ATOM)."\n=\n".print_r($data,true)."=\n", FILE_APPEND);
+        file_put_contents(__DIR__."/../log/context_sent_to_llm.log",date(DATE_ATOM)."\n=\n".var_export($data,true)."\n=\n", FILE_APPEND);
 
         $headers = array(
             'Content-Type: application/json',
@@ -390,7 +349,8 @@ class connector
                 'method' => 'POST',
                 'header' => implode("\r\n", $headers),
                 'content' => json_encode($data),
-                'timeout' => 30
+                'timeout' => 30,
+                "ignore_errors" => true
             )
         );
 
@@ -410,17 +370,40 @@ class connector
                     ));
             }
             return null;
-                
-        } else  {
-            if ($GLOBALS["db"]) {
-                $GLOBALS["db"]->insert(
-                 'audit_request',
-                 array(
-                    'request' => json_encode($data),
-                    'result' => "Ok"
-                ));
-            }
+        } else {
+            // Get HTTP response code
+            $response_info = stream_get_meta_data($this->primary_handler);
+            $status_line = $response_info['wrapper_data'][0];
+            preg_match('/\d{3}/', $status_line, $matches); // get three digits (200, 300, 404, etc)
+            $status_code = isset($matches[0]) ? intval($matches[0]) : null;
 
+            if ($status_code >= 300) {
+                $response = stream_get_contents($this->primary_handler);
+                $error_message = "Request to openrouterjson connector failed: {$status_line}.\nResponse body: {$response}";
+                trigger_error($error_message, E_USER_WARNING);
+
+                if ($GLOBALS["db"]) {
+                    $GLOBALS["db"]->insert(
+                    'audit_request',
+                        array(
+                            'request' => json_encode($data),
+                            'result' => $error_message
+                        ));
+                }
+
+                $this->close();
+                $this->primary_handler=false;
+                return null;
+            } else  {
+                if ($GLOBALS["db"]) {
+                    $GLOBALS["db"]->insert(
+                    'audit_request',
+                    array(
+                        'request' => json_encode($data),
+                        'result' => "Ok"
+                    ));
+                }
+            }
         }
 
         $this->_dataSent=json_encode($data);    // Will use this data in tokenizer.
@@ -443,7 +426,7 @@ class connector
             $GLOBALS["patch_openrouter_timeout"]=time();
 
         if ($this->isDone()) {//  Didn't output anything?
-            if (empty(trim($this->_buffer))) {
+            if (!$this->_buffer || empty(trim($this->_buffer))) {
                 $line="";    
                 error_log("LLM didn't output anything");
             }
@@ -537,8 +520,9 @@ class connector
     // Method to close the data processing operation
     public function close()
     {
-
-        fclose($this->primary_handler);
+        if ($this->primary_handler) {
+            fclose($this->primary_handler);
+        }
         
         if (($this->_buffer==null) || (empty(trim($this->_buffer))) ) {
 
@@ -609,7 +593,7 @@ class connector
                             } else {
                                 $this->_commandBuffer[]="{$GLOBALS["HERIKA_NAME"]}|command|$functionCodeName@{$parsedResponse["target"]}\r\n";
                             }
-                        } else {
+                        } elseif ($parsedResponse["action"] != "Talk") {
                             error_log("Function not found for {$parsedResponse["action"]}");
                         }
                         
@@ -639,7 +623,7 @@ class connector
     {
         if ($this->_forcedClose)
             return true;
-        return feof($this->primary_handler);
+        return !$this->primary_handler || feof($this->primary_handler);
     }
 
 }

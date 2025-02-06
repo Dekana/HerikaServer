@@ -13,6 +13,12 @@ curl -X 'POST' \
 }'
 */
 
+$melotts_pronunciation_file = dirname(__FILE__) . DIRECTORY_SEPARATOR ."tts-melotts_pronunciation.php";
+if (file_exists($melotts_pronunciation_file)) {
+    include_once($melotts_pronunciation_file);
+    //error_log("melotts pronunciation adjustment file found: " . $melotts_pronunciation_file);
+} 
+
 $GLOBALS["TTS_IN_USE"]=function($textString, $mood , $stringforhash) {
     
     $newString=$textString;
@@ -42,7 +48,10 @@ $GLOBALS["TTS_IN_USE"]=function($textString, $mood , $stringforhash) {
 
 
     if (empty($voice)) {
+
         $codename=strtr(strtolower(trim($GLOBALS["HERIKA_NAME"])),[" "=>"_","'"=>"+"]);
+        $codename=preg_replace('/[^a-zA-Z0-9_+]/u', '', $codename);
+
         $cn=$GLOBALS["db"]->escape("Voicetype/$codename");
         $vtype=$GLOBALS["db"]->fetchAll("select value from conf_opts where id='$cn'");
         $voicetypeString=(isOk($vtype))?$vtype[0]["value"]:null;
@@ -61,8 +70,18 @@ $GLOBALS["TTS_IN_USE"]=function($textString, $mood , $stringforhash) {
     if (empty($voice))
         error_log("Error, voiceid is no set");
 
+    $cleanString = $textString; 
+    if (function_exists('adjust_pronunciation')) {
+        if (function_exists('pronunciation_adjust_enabled')) 
+            $b_ok = pronunciation_adjust_enabled();
+        else 
+            $b_ok = true; 
+        //error_log("melotts pronunciation_adjust_enabled: " . ($b_ok ? "YES" : "NO"));
+        if ($b_ok) 
+            $cleanString = adjust_pronunciation($textString); // adjust English mispronunciations.
+    } else error_log("melotts info: pronunciation adjustments NOT defined.");
 
-    $finalData =["speaker"=>"$voice","text"=>"$textString","language"=>"EN","speed"=>$speed];
+    $finalData =["speaker"=>"$voice","text"=>"$cleanString","language"=>"EN","speed"=>$speed];
     //print_r($finalData);
 	
 	$options = array(
@@ -79,6 +98,15 @@ $GLOBALS["TTS_IN_USE"]=function($textString, $mood , $stringforhash) {
     
     $result = file_get_contents($url, false, $context);
     
+    if (is_array($GLOBALS["TTS_FFMPEG_FILTERS"])) {
+        $GLOBALS["TTS_FFMPEG_FILTERS"]["adelay"]="adelay=150|150";
+        $FFMPEG_FILTER='-af "'.implode(",",$GLOBALS["TTS_FFMPEG_FILTERS"]).'"';
+        
+    } else {
+
+        $FFMPEG_FILTER='-filter:a "adelay=150|150"';
+    }
+
 
     // Handle the response
     if ($result !== false ) {
@@ -92,7 +120,7 @@ $GLOBALS["TTS_IN_USE"]=function($textString, $mood , $stringforhash) {
 
         $startTimeTrans = microtime(true);
         //shell_exec("ffmpeg -y -i $oname  -af \"adelay=150|150,silenceremove=start_periods=1:start_silence=0.1:start_threshold=-25dB,areverse,silenceremove=start_periods=1:start_silence=0.1:start_threshold=-40dB,areverse,speechnorm=e=3:r=0.0001:l=1:p=0.75\" $fname 2>/dev/null >/dev/null");
-        shell_exec("ffmpeg -y -i $oname  -af \"adelay=150|150\" $fname 2>/dev/null >/dev/null");
+        shell_exec("ffmpeg -y -i $oname  $FFMPEG_FILTER $fname 2>/dev/null >/dev/null");
         $endTimeTrans = microtime(true)-$startTimeTrans;
         
         file_put_contents(dirname((__FILE__)) . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "soundcache/" . md5(trim($stringforhash)) . ".txt", trim($textString) . "\n\rtotal call time:" . (microtime(true) - $starTime) . " ms\n\rffmpeg transcoding: $endTimeTrans secs\n\rsize of wav ($size)\n\rfunction tts($textString,$mood=\"cheerful\",$stringforhash)");

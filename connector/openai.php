@@ -31,6 +31,7 @@ class connector
     public function open($contextData, $customParms)
     {
         $url = $GLOBALS["CONNECTOR"][$this->name]["url"];
+        $b_groq = (strpos($url, "groq.com") > 0 ); // https://api.groq.com/openai/v1/chat/completions
 
         $MAX_TOKENS=((isset($GLOBALS["CONNECTOR"][$this->name]["max_tokens"]) ? $GLOBALS["CONNECTOR"][$this->name]["max_tokens"] : 48)+0);
 
@@ -54,6 +55,7 @@ class connector
         
         $contextDataOrig=array_values($contextData);
         $pb["user"]="";
+        $pb["system"]=""; 
         foreach ($contextDataOrig as $n=>$element) {
             
             
@@ -127,49 +129,89 @@ class connector
         
         $contextData=$contextDataCopy;
         
-        
-        $data = array(
-            'model' => (isset($GLOBALS["CONNECTOR"][$this->name]["model"])) ? $GLOBALS["CONNECTOR"][$this->name]["model"] : 'gpt-3.5-turbo-0613',
-            'messages' =>
-                $contextData
-            ,
-            'stream' => true,
-            'max_tokens'=>$MAX_TOKENS,
-            'temperature' => ($GLOBALS["CONNECTOR"][$this->name]["temperature"]) ?: 1,
-            'top_p' => ($GLOBALS["CONNECTOR"][$this->name]["top_p"]) ?: 1,
-        );
-        // Mistral AI API does not support penalty params
-        if (strpos($url, "mistral") === false) {
-            $data["presence_penalty"]=($GLOBALS["CONNECTOR"][$this->name]["presence_penalty"]) ?: 0;
-            $data["frequency_penalty"]=($GLOBALS["CONNECTOR"][$this->name]["frequency_penalty"]) ?: 0;
-        }
-  
-        
 
-        if (isset($customParms["MAX_TOKENS"])) {
-            if ($customParms["MAX_TOKENS"]==0) {
-                unset($data["max_tokens"]);
-            } elseif (isset($customParms["MAX_TOKENS"])) {
-                $data["max_tokens"]=$customParms["MAX_TOKENS"]+0;
-            }
-        }
-
-        if (isset($GLOBALS["FORCE_MAX_TOKENS"])) {
-            if ($GLOBALS["FORCE_MAX_TOKENS"]==0) {
-                unset($data["max_tokens"]);
-            } else
-                $data["max_tokens"]=$GLOBALS["FORCE_MAX_TOKENS"]+0;
+        if ($b_groq) { // --- exception made for groq.com
+            // this sequence send only content for chat completion
             
-        }
-
-        if (isset($GLOBALS["FUNCTIONS_ARE_ENABLED"]) && $GLOBALS["FUNCTIONS_ARE_ENABLED"]) {
-            foreach ($GLOBALS["FUNCTIONS"] as $function)
-                $data["tools"][]=["type"=>"function","function"=>$function];
-            if (isset($GLOBALS["FUNCTIONS_FORCE_CALL"])) {
-                $data["tool_choice"]=$GLOBALS["FUNCTIONS_FORCE_CALL"];
+            $data = array( 
+                'model' => (isset($GLOBALS["CONNECTOR"][$this->name]["model"])) ? $GLOBALS["CONNECTOR"][$this->name]["model"] : 'llama-3.3-70b-versatile', // short lifespan
+                'messages' => $contextData, 
+                'stream' => true, // required for CHIM
+                'max_completion_tokens'=>$MAX_TOKENS,  //changed,  max_tokens deprecated by groq in jan 2025
+                'temperature' => ($GLOBALS["CONNECTOR"][$this->name]["temperature"]) ?: 1, 
+                'top_p' => ($GLOBALS["CONNECTOR"][$this->name]["top_p"]) ?: 1, 
+                'presence_penalty' => ($GLOBALS["CONNECTOR"][$this->name]["presence_penalty"]) ?: 0, 
+                'frequency_penalty' => ($GLOBALS["CONNECTOR"][$this->name]["frequency_penalty"]) ?: 0 
+            );
+                
+            if (!(stripos($data["model"],"deepseek-r1") === false)) { 
+            /*  deepseek r1 need "reasoning_format" parameter: 
+                parsed  - Separates reasoning into a dedicated field while keeping the response concise.
+                raw     - Includes reasoning within <think> tags in the content.
+                hidden  - Returns only the final answer for maximum efficiency. ! <think> tag is generated and only hidden, tokens are counted ! */
+                $data['reasoning_format'] = "hidden";  
+                //error_log(" deepseek-r1: " . print_r($data,false));
+            }
+            
+            if (isset($customParms["MAX_TOKENS"])) {
+                if ($customParms["MAX_TOKENS"]==0) {
+                    unset($data["max_completion_tokens"]); 
+                } elseif (isset($customParms["MAX_TOKENS"])) {
+                    $data["max_completion_tokens"]=$customParms["MAX_TOKENS"]+0;
+                }
             }
 
-        }
+            if (isset($GLOBALS["FORCE_MAX_TOKENS"])) {
+                if ($GLOBALS["FORCE_MAX_TOKENS"]==0) {
+                    unset($data["max_completion_tokens"]);
+                } else
+                    $data["max_completion_tokens"]=$GLOBALS["FORCE_MAX_TOKENS"]+0;
+            }
+
+        } else { // --- normal flow (not groq)
+
+            $data = array(
+                'model' => (isset($GLOBALS["CONNECTOR"][$this->name]["model"])) ? $GLOBALS["CONNECTOR"][$this->name]["model"] : 'gpt-4o-mini',
+                'messages' =>
+                    $contextData,
+                'stream' => true,
+                'max_completion_tokens'=>$MAX_TOKENS,
+                'temperature' => ($GLOBALS["CONNECTOR"][$this->name]["temperature"]) ?: 1,
+                'top_p' => ($GLOBALS["CONNECTOR"][$this->name]["top_p"]) ?: 1,
+            );
+            // Mistral AI API does not support penalty params
+            if (strpos($url, "mistral") === false) {
+                $data["presence_penalty"]=($GLOBALS["CONNECTOR"][$this->name]["presence_penalty"]) ?: 0;
+                $data["frequency_penalty"]=($GLOBALS["CONNECTOR"][$this->name]["frequency_penalty"]) ?: 0;
+            }
+
+
+
+            if (isset($customParms["MAX_TOKENS"])) {
+                if ($customParms["MAX_TOKENS"]==0) {
+                    unset($data["max_completion_tokens"]);
+                } elseif (isset($customParms["MAX_TOKENS"])) {
+                    $data["max_completion_tokens"]=$customParms["MAX_TOKENS"]+0;
+                }
+            }
+
+
+            if (isset($GLOBALS["FORCE_MAX_TOKENS"])) {
+                if ($GLOBALS["FORCE_MAX_TOKENS"]==0) {
+                    unset($data["max_completion_tokens"]);
+                } else
+                    $data["max_completion_tokens"]=$GLOBALS["FORCE_MAX_TOKENS"]+0;
+            }
+
+            if (isset($GLOBALS["FUNCTIONS_ARE_ENABLED"]) && $GLOBALS["FUNCTIONS_ARE_ENABLED"]) {
+                foreach ($GLOBALS["FUNCTIONS"] as $function)
+                    $data["tools"][]=["type"=>"function","function"=>$function];
+                if (isset($GLOBALS["FUNCTIONS_FORCE_CALL"])) {
+                    $data["tool_choice"]=$GLOBALS["FUNCTIONS_FORCE_CALL"];
+                }
+            }
+
+        } // --- endif groq
 
         if (isset($GLOBALS["CONNECTOR"][$this->name]["extra_parameters"]) && is_rray($GLOBALS["CONNECTOR"][$this->name]["extra_parameters"])) {
             foreach ($GLOBALS["CONNECTOR"][$this->name]["extra_parameters"] as $k=>$v) {
@@ -196,7 +238,7 @@ class connector
 
         $context = stream_context_create($options);
 
-        file_put_contents(__DIR__."/../log/context_sent_to_llm.log",date(DATE_ATOM)."\n=\n".print_r($data,true)."=\n", FILE_APPEND);
+        file_put_contents(__DIR__."/../log/context_sent_to_llm.log",date(DATE_ATOM)."\n=\n".var_export($data,true)."\n=\n", FILE_APPEND);
 
                 
         $this->primary_handler = fopen($url, 'r', false, $context);

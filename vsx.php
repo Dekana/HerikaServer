@@ -1,5 +1,6 @@
 <?php
 
+require_once("lib/utils.php");
 
 /* Voice Sample Extractor */
 
@@ -13,18 +14,51 @@ require_once($path . "lib" .DIRECTORY_SEPARATOR."auditing.php");
 
 // Put info into DB asap
 $db=new sql();
-$codename = str_replace(" ", "_", mb_strtolower($_GET["codename"], 'UTF-8'));
-$codename = str_replace("'", "+", $codename);
+$voicelogic = $GLOBALS["TTS"]["XTTSFASTAPI"]["voicelogic"]; 
 
-$db->delete("conf_opts", "id='".$db->escape("Voicetype/$codename")."'");
-$db->insert(
-  'conf_opts',
-  array(
-      'id' => $db->escape("Voicetype/$codename"),
-      'value' => $_GET["oname"]
-  )
-);
-$db->close();
+
+if ($voicelogic === 'voicetype') {
+
+  //db insert for name entry for data_functions.
+  $codename = npcNameToCodename($_GET["codename"]);
+  $db->delete("conf_opts", "id='" . $db->escape("Nametype/$codename") . "'");
+  $db->insert(
+      'conf_opts',
+      array(
+          'id' => $db->escape("Nametype/$codename"),
+          'value' => $_GET["oname"]
+      )
+  );
+
+  // new logic so codename is set to voicetype so it generates voicetype sample
+  $voicetype = explode("\\", $_GET["oname"]); // Split the path
+  $codename = strtolower($voicetype[3]); // Use the 4th part of the path
+  // Delete and insert the database entry
+  $db->delete("conf_opts", "id='" . $db->escape("Voicetype/$codename") . "'");
+  $db->insert(
+      'conf_opts',
+      array(
+          'id' => $db->escape("Voicetype/$codename"),
+          'value' => $_GET["oname"]
+      )
+  );
+
+  $db->close();
+
+} else {
+  $codename = npcNameToCodename($_GET["codename"]);
+    // Old name logic
+  $db->delete("conf_opts", "id='" . $db->escape("Voicetype/$codename") . "'");
+  $db->insert(
+      'conf_opts',
+      array(
+          'id' => $db->escape("Voicetype/$codename"),
+          'value' => $_GET["oname"]
+      )
+  );
+  $db->close();
+}
+
 
 
 if (strpos($_GET["oname"],".fuz"))  {
@@ -39,6 +73,8 @@ if (strpos($_GET["oname"],".fuz"))  {
 $already=file_exists("{$GLOBALS["TTS"]["XTTSFASTAPI"]["endpoint"]}/sample/$codename.wav");
 $finalName=__DIR__.DIRECTORY_SEPARATOR."soundcache/_vsx_".md5($_FILES["file"]["tmp_name"]).".$ext";
 @copy($_FILES["file"]["tmp_name"] ,$finalName);
+
+
 
 if (!$already) {
 

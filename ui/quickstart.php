@@ -18,7 +18,6 @@ header("Expires: 0"); // Proxies
         body {
             background-color: #121212;
             color: #e0e0e0;
-            padding: 20px;
         }
         .confwizard {
             background-color: #1e1e1e;
@@ -114,8 +113,10 @@ session_start();
 ob_start();
 
 $url = 'conf_editor.php';
+
 $rootPath = __DIR__ . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR;
-$configFilepath = $rootPath . "conf" . DIRECTORY_SEPARATOR;
+$configFilepath = __DIR__.DIRECTORY_SEPARATOR."..".DIRECTORY_SEPARATOR."conf".DIRECTORY_SEPARATOR;
+$rootEnginePath = __DIR__.DIRECTORY_SEPARATOR."..".DIRECTORY_SEPARATOR;
 
 $TITLE = "QUICKSTART MENU"; // Updated title
 
@@ -128,6 +129,13 @@ if (file_exists($rootPath . "conf" . DIRECTORY_SEPARATOR . "conf.php")) {
     require_once($rootPath . "conf" . DIRECTORY_SEPARATOR . "conf.php"); // Current configs
 }
 require_once($rootPath . "conf" . DIRECTORY_SEPARATOR . 'conf_loader.php');
+
+/* DB update logic */
+require_once($rootEnginePath . "lib" .DIRECTORY_SEPARATOR."{$GLOBALS["DBDRIVER"]}.class.php");
+$db = new sql();
+/* Check for database updates */
+require_once(__DIR__."/../debug/db_updates.php");
+/* END of check database for updates */
 
 // Profile selection
 foreach (glob($configFilepath . 'conf_????????????????????????????????.php') as $mconf) {
@@ -192,8 +200,8 @@ echo '<div class="container">
 // Main Heading
 echo '<div class="container">
       <h1 class="text-center mb-4">QUICKSTART MENU</h1>
-      <h2 class="text-center mb-4">This menu is only meant to be used for the initial setup.</h2>
-      <h2 class="text-center mb-4">Please use the Configuration Wizard for any further changes.</h2>
+      <h2 class="text-center mb-4">Only to be used for the initial setup!</h2>
+      <h3 class="text-center mb-4">If you want to make more advanced changes, enter the appropriate info below to the best of your ability. Click Save and make further changes in the Configuration Wizard.</h3>
     </div>';
 
 if ($_SESSION["PROFILE"] == "$configFilepath/conf.php") {
@@ -261,7 +269,7 @@ foreach ($quickstartConf as $pname => $parms) {
     } else if ($parms["type"] == "select") {
         if ($pname == "TTSFUNCTION") {
             $parms["values"] = ["melotts","xtts-fastapi","xvasynth"];
-            $parms["description"] = "Select the TTS service you wish to use. <br>You can install MeloTTS under Tools/Components/AMD or NVIDIA GPU in the DwemerDistro folder if you have not already.<br> You can install XTTS under Tools/Components/NVIDIA GPU in the DwemerDistro folder. <br><b>For xVASnyth you will need to edit the [TTS XVASNYTH url] in the Configuration Wizard to complete the setup after you are done with this menu!</b> <br><b>We recommend MeloTTS for most users.</b>";
+            $parms["description"] = "Select the TTS service you wish to use. <br>You can install MeloTTS under <i>Tools/Components/AMD or NVIDIA GPU<i> in the DwemerDistro folder.<br> You can install XTTS under <i>Tools/Components/NVIDIA GPU</i> in the DwemerDistro folder. <br><b>For xVASynth you will need to edit the [TTS XVASynTH url] in the Configuration Wizard to complete the setup after you are done with this menu!</b> <br><b>We recommend MeloTTS for most first time users.</b>";
         }
     
         echo "<select class='form-control' id='$fieldName' name='" . htmlspecialchars($fieldName) . "' $FORCE_DISABLED>";
@@ -332,9 +340,11 @@ echo '<div class="btn-group-custom text-center">
     After you click <b>Save</b> we <b>HIGHLY RECOMMEND</b> to open the Troubleshooting menu and run the LLM/AI, TTS and STT tests to verify everything is setup correctly.
 </p>
 <div class="btn-group-custom text-center">
-    <p class="warning-text3">
-        Also check out the <a href="/HerikaServer/ui/index.php?notes=true" target="_blank">CHIM 101</a> guide and the <a href="https://docs.google.com/document/d/12KBar_VTn0xuf2pYw9MYQd7CKktx4JNr_2hiv4kOx3Q/edit#heading=h.22ert9k7wlm" target="_blank">CHIM Manual</a> to learn how to make the most out of this mod!
-    </p>
+    <h3 class="warning-text3">
+        PLEASE READ the <a href="/HerikaServer/ui/index.php?notes=true" target="_blank">CHIM 101</a> guide and the 
+        <a href="https://docs.google.com/document/d/12KBar_VTn0xuf2pYw9MYQd7CKktx4JNr_2hiv4kOx3Q/edit#heading=h.22ert9k7wlm" target="_blank">CHIM Manual</a> 
+        to learn how to make the most out of this mod!
+    </h3>
 </div>
 
 

@@ -35,7 +35,7 @@
                 <!-- Logs Category -->
                 <li><h6 class="dropdown-header">Logs</h6></li>
                 <li>
-                    <a class="dropdown-item" href="index.php?table=log">AI Log</a>
+                    <a class="dropdown-item" href="index.php?table=log">Response Log</a>
                 </li>
                 <li>
                     <a class="dropdown-item" href="index.php?table=diarylog">Diary Log</a>
@@ -62,38 +62,72 @@
 
                     <!-- First Category Header -->
                     <li><h6 class="dropdown-header">Event Management</h6></li>
-                    <li>
+                    <!-- <li>
                     <a class="dropdown-item" href="index.php?clean=true&table=response" title="Delete sent events." onclick="return confirm('Sure?')">
                         Clean Sent Events
                     </a>
                     </li>
-                    <li>
-                    <a class="dropdown-item" href="index.php?sendclean=true&table=response" title="Marks unsent events from queue." onclick="return confirm('Sure?')">
-                        Reset Sent Events
+                    <li>-->
+                    <a class="dropdown-item" href="index.php?sendclean=true&table=response" title="This will clear the short term context buffer of events that will be sent with the AI prompt (CONTEXT_HISTORY). Will not delete events from the event log." onclick="return confirm('This will clear the short term context buffer of events that will be sent with the AI prompt (CONTEXT_HISTORY). Will not delete events from the event log. ARE YOU SURE?')">
+                        Clear Current Context Events Buffer
                     </a>
                     </li>
                     <li>
-                    <a class="dropdown-item" href="index.php?reset=true&table=event" title="Delete all events." onclick="return confirm('Sure?')">
+                    <a class="dropdown-item" href="index.php?reset=true&table=event" title="Delete all events." onclick="return confirm('THIS WILL DELETE ALL EVENTS IN THE EVENT LOG! ARE YOU SURE???')">
                         Delete All Events
                     </a>
                     </li>
                     <li><hr class="dropdown-divider"></li>
 
                     <!-- Second Category Header -->
-                    <li><h6 class="dropdown-header">AI Log Management</h6></li>
+                    <li><h6 class="dropdown-header">Response Log Management</h6></li>
                     <li>
-                    <a class="dropdown-item" href="index.php?cleanlog=true" title="Clean AI Log table" onclick="return confirm('Sure?')">
-                        Clean AI Log
+                    <a class="dropdown-item" href="index.php?cleanlog=true" title="Clean AI Log table" onclick="return confirm('This will clear all the entries in the AI Log. ARE YOU SURE?')">
+                        Clean Response Log
                     </a>
                     </li>
                     <li>
                     <a class="dropdown-item" href="index.php?export=log" title="Export AI Log table (debugging purposes)." target="_blank">
-                        Export AI Log
+                        Export Response Log
                     </a>
                     </li>
-                    <li><hr class="dropdown-divider"></li>
 
-                    <!-- Third Category Header -->
+                    <li><hr class="dropdown-divider"></li>
+                    <li><h6 class="dropdown-header">Memory Management</h6></li>
+                    <li>
+                    <a class="dropdown-item" href="tests/vector-compact-chromadb.php" title="Compact and Sync Memories." onclick="return confirm('Will use tokens from your current AI connector. May take a few minutes to process. DO NOT REFRESH THE WEBPAGE!')">
+                        Sync & Create Memory Summaries
+                    </a>
+                    </li><li>
+                    <a class="dropdown-item" href="tests/vector-delete-memory_summary.php" title="Compact and Sync Memories." onclick="return confirm('Will delete all summarized memories. ARE YOU SURE?')">
+                        Delete All Memory Summaries
+                    </a>
+                    </li>
+
+                    <li><hr class="dropdown-divider"></li>
+                    <li><h6 class="dropdown-header">Character Profiles</h6></li>
+                    <li>
+                    <a class="dropdown-item" href="export_conf.php" target="_blank" title="Exports current character profiles into a ZIP file.">
+                        Backup Character Profiles
+                    </a>
+                    </li>
+                    <li>
+                    <a class="dropdown-item" href="import_conf.php" target="_blank" title="Imports character profiles from a ZIP file.">
+                        Restore Character Profiles
+                    </a>
+                    </li>
+                    <li>
+                    <a class="dropdown-item" href="delete_conf.php" target="_blank" title="Deletes all character profiles apart from the default." onclick="return confirm('This will delete ALL CHARACTER PROFILES. You can not reverse this operation. ARE YOU SURE???')">
+                        Delete All Character Profiles
+                    </a>
+                    </li>
+                    <li>
+                    <a class="dropdown-item" href="cmd/action_regen_charmap.php" title="Use only if you deleted character_map.json!" target="_blank">
+                        Regenerate Character Map
+                    </a>
+                    </li>
+
+                    <li><hr class="dropdown-divider"></li>
                     <li><h6 class="dropdown-header">Database Operations</h6></li>
                     <li>
                     <a class="dropdown-item" href="/pgAdmin/" target="_blank" title="pgAdmin Database Manager. User/password is 'dwemer'">
@@ -110,41 +144,44 @@
                         Restore Current Database 
                     </a>
                     </li>
+                    <!--
                     <li>
                     <a class="dropdown-item" href="index.php?reinstall=true&delete=true" title="Fully reinstalls the CHIM Database." 
                     onclick="return confirm('This will wipe and reinstall the entire database!!! If you want to delete configurations, delete conf.php and conf_*.php files from HerikaServer conf folder. ARE YOU SURE?')">
                         Factory Reset Server Database
                     </a>
                     </li>
-                    <li><hr class="dropdown-divider"></li>
+                    -->
 
-                    <!-- Fourth Category Header -->
-                    <li><h6 class="dropdown-header">Character Profiles</h6></li>
-                    <li>
-                    <a class="dropdown-item" href="export_conf.php" target="_blank" title="Exports current character profiles into a ZIP file.">
-                        Backup Character Profiles
-                    </a>
-                    </li>
-                    <li>
-                    <a class="dropdown-item" href="import_conf.php" target="_blank" title="Imports character profiles from a ZIP file.">
-                        Restore Character Profiles
-                    </a>
-                    </li>
                     <li><hr class="dropdown-divider"></li>
-
-                    <!-- Fifth Category Header -->
                     <li><h6 class="dropdown-header">Utilities</h6></li>
                     <li>
-                    <a class="dropdown-item" href="tests/vector-compact-chromadb.php" title="Compact and Sync Memories." onclick="return confirm('Will use up tokens from your current AI connector. May take a few minutes to process. DO NOT REFRESH THE WEBPAGE!')">
-                        Compact & Sync Memories
-                    </a>
+                    <div style="
+                        display: flex; 
+                        justify-content: center; 
+                        align-items: center; 
+                        margin-top: 20px;">
+                        <button style="
+                            font-weight: bold;
+                            border: 1px solid;
+                            transition: background-color 0.3s, color 0.3s;
+                            border-radius: 4px;
+                            text-align: center;
+                            text-decoration: none;
+                            background-color: #ffc107;
+                            color: black;
+                            padding: 6px 12px;
+                            font-size: 14px;
+                            cursor: pointer;
+                        " 
+                        onmouseover="this.style.backgroundColor='#e6ac00';"
+                        onmouseout="this.style.backgroundColor='#ffc107';"
+                        onclick="window.open('tests/ai_agent_ini.php', '_blank')" 
+                        title="Generate AIAgent.ini file for the mod file.">
+                            <strong>Create AIAgent.ini<br>(Place in mod folder under SKSE\Plugins)</strong>
+                        </button>
+                    </div>
                     </li>
-                    <li>
-                    <a class="dropdown-item" href="tests/ai_agent_ini.php" title="Generate AIAgent.ini file for the mod file." target="_blank">
-                        <strong>Create AIAgent.ini (Place in mod folder under SKSE\Plugins)</strong>
-                    </a>
-                    </li>
-
                 </ul>
             </li>
 
@@ -152,14 +189,24 @@
                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Configuration</a>
                 <ul class="dropdown-menu">
 
-                    <!-- First Category Header -->
+                    
                     <li><h6 class="dropdown-header">Configuration Tools</h6></li>
                     <li>
                     <a class="dropdown-item" href="conf_wizard.php">Configuration Wizard</a>
                     </li>
                     <li>
-                    <a class="dropdown-item" href="npc_upload.php" title="Upload NPC Biographies with a csv file" target="_blank">
-                        Upload NPC Biographies
+                    <a class="dropdown-item" href="npc_upload.php" title="Edit NPC biographies entries" target="_blank">
+                        NPC Biography Management
+                    </a>
+                    </li>
+                    <li>
+                    <a class="dropdown-item" href="oghma_upload.php" title="Edit Oghma Infinium entries" target="_blank">
+                        Oghma Infinium Management
+                    </a>
+                    </li>
+                    <li>
+                    <a class="dropdown-item" href="customprompteditor.php" target="_blank">
+                    Custom Prompt Editor
                     </a>
                     </li>
                     <li>
@@ -168,30 +215,26 @@
                     </a>
                     </li>
 
-                    <li><hr class="dropdown-divider"></li>
 
-                    <!-- Second Category Header -->
-                    <li><h6 class="dropdown-header">AI Voice Management</h6></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><h6 class="dropdown-header">TTS Voice Management</h6></li>
                     <li>
                     <a class="dropdown-item" href="xtts_clone.php" title="Manually manage XTTS FastAPI voices" target="_blank" rel="noopener noreferrer">
-                        XTTS Distro Management
+                        CHIM XTTS Management
                     </a>
                     </li>
                     <li>
                     <a class="dropdown-item" href="http://localhost:59125" title="Find Mimic3 voices" target="_blank">
-                        Mimic3 Browser
+                        Mimic3 Management
                     </a>
                     </li>
                     <li><hr class="dropdown-divider"></li>
-
-                    <!-- Third Category Header -->
-                    <li><h6 class="dropdown-header">Guides (PLEASE READ!)</h6></li>
-                    <li><a class="dropdown-item" href='index.php?notes=true'>CHIM 101 Quick Guide</a></li>
-                    <li><a class="dropdown-item" href='https://docs.google.com/document/d/12KBar_VTn0xuf2pYw9MYQd7CKktx4JNr_2hiv4kOx3Q/edit?usp=sharing' target="_blank">CHIM Manual</a></li>
+                    <li><h6 class="dropdown-header">Web Extensions</h6></li>
                     <li>
-                    <a class="dropdown-item" href="https://docs.google.com/spreadsheets/d/1cLoJRT1AsjoICg8E4PzXylsWUSYzqlKvj32F6Q5clpg/edit?gid=0#gid=0" target="_blank">
-                        AI/LLM Supported Models List
-                    </a>
+                    <a class="dropdown-item" href="addons/pmstt" target="_blank">Chrome Free Speech-to-Text</a>
+                    </li>
+                    <li>
+                    <a class="dropdown-item" href="addons/websocket" target="_blank">Websocket Configuration (WIP)</a>
                     </li>
                 </ul>
             </li>
@@ -205,21 +248,6 @@
                 <li>
                 <a class="dropdown-item" href="tests.php" target="_blank">Current LLM/AI Connection Test</a>
                 </li>
-                <!-- Uncomment the following items if needed -->
-                <!--
-                <li>
-                <a class="dropdown-item" href="tests/tts-test-azure.php" target="_blank">Test Azure TTS Connection</a>
-                </li>
-                <li>
-                <a class="dropdown-item" href="tests/tts-test-mimic3.php" target="_blank">Test MIMIC3 TTS Connection</a>
-                </li>
-                <li>
-                <a class="dropdown-item" href="tests/tts-test-11labs.php" target="_blank">Test ElevenLabs TTS Connection</a>
-                </li>
-                <li>
-                <a class="dropdown-item" href="tests/tts-test-gcp.php" target="_blank">Test Google Cloud TTS Connection</a>
-                </li>
-                -->
                 <li>
                 <a class="dropdown-item" href="tests/tts-test.php" target="_blank">Current TTS Connection Test</a>
                 </li>
@@ -238,14 +266,6 @@
                 <li>
                 <a class="dropdown-item" href="../soundcache/" target="_blank">Audio & Image Cache</a>
                 </li>
-                <li><hr class="dropdown-divider"></li>
-                <!-- Utilities -->
-                <li><h6 class="dropdown-header">Utilities</h6></li>
-                <li>
-                <a class="dropdown-item" href="cmd/action_regen_charmap.php" title="Use only if you deleted character_map.json!" target="_blank">
-                    Regenerate Character Map
-                </a>
-                </li>
                 <!--<li>
                 <a class="dropdown-item" href="updater.php" target="_blank">Update Server</a>
                 </li>-->
@@ -257,7 +277,8 @@
                 <ul class="dropdown-menu">
                     <li><h6 class="dropdown-header">Immersion Tools</h6></li>
                     <li><a class="dropdown-item" href="addons/diary" target="_blank">AI Diary</a></li>
-                    <li><a class="dropdown-item" href="addons/chatsim" target="_blank">Chat Simulation</a></li>
+                    <li><a class="dropdown-item" href="addons/adventurelog" target="_blank">Adventure Log</a></li>
+                    <li><a class="dropdown-item" href="addons/chatsim" target="_blank">Chat Testing</a></li>
                     <!--<li><a class="dropdown-item" href="addons/scriptwriter" target="_blank">Script Writer</a></li>-->
                     <!--<li><a class="dropdown-item" href="addons/background" target="_blank">Background Story Generator</a></li>-->
                 </ul>
@@ -267,15 +288,57 @@
                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Server Plugins</a>
                 <ul class="dropdown-menu">
                     <li><h6 class="dropdown-header">CHIM Extensions</h6></li>
-                    <li><a class="dropdown-item" href='index.php?plugins_show=true'>Installed Plugins</a></li>
+                    <li><a class="dropdown-item" href='index.php?plugins_show=true'>Plugin Manager</a></li>
                     <li><hr class="dropdown-divider"></li>
                     <li><h6 class="dropdown-header">Debugging</h6></li>
-                    <li><a class="dropdown-item" href="index.php?table=responselog" title="">Responses</a></li>
-                    <li><a class="dropdown-item" href="index.php?table=audit_request" title="">Requests logs</a></li>
+                    <li><a class="dropdown-item" href="index.php?table=responselog" title="">Response Queue</a></li>
+                    <li><a class="dropdown-item" href="index.php?table=audit_request" title="">Request Logs</a></li>
+                    <div style="
+                    display: flex; 
+                    justify-content: center; 
+                    align-items: center; 
+                    margin-top: 20px;">
+                    <button style="
+                        font-weight: bold;
+                        border: 1px solid;
+                        transition: background-color 0.3s, color 0.3s;
+                        border-radius: 4px;
+                        text-align: center;
+                        text-decoration: none;
+                        background-color: #dc3545; /* Red background */
+                        color: black;
+                        padding: 6px 12px;
+                        font-size: 14px;
+                        cursor: pointer;
+                    " 
+                    onmouseover="this.style.backgroundColor='#c82333';"
+                    onmouseout="this.style.backgroundColor='#dc3545';"
+                    onclick="if (confirm('This will wipe and reinstall the entire database!!! ARE YOU SURE?')) { window.location.href = 'index.php?reinstall=true&delete=true'; }"
+                    title="Fully reinstalls the CHIM Database.">
+                        <strong>Factory Reset Server Database</strong>
+                    </button>
+                </div>
+
+                </ul>
+            </li>
+            <li class="nav-item dropdown mx-2">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Guides</a>
+                <ul class="dropdown-menu">
+                    <li><h6 class="dropdown-header">PLEASE READ!</h6></li>
+                    <li><a class="dropdown-item" href='index.php?notes=true'>CHIM 101 Quick Guide</a></li>
+                    <li><a class="dropdown-item" href='https://docs.google.com/document/d/12KBar_VTn0xuf2pYw9MYQd7CKktx4JNr_2hiv4kOx3Q/edit?usp=sharing' target="_blank">CHIM Manual</a></li>
+                    <li><a class="dropdown-item" href="https://docs.google.com/spreadsheets/d/1cLoJRT1AsjoICg8E4PzXylsWUSYzqlKvj32F6Q5clpg/edit?gid=0#gid=0" target="_blank">AI/LLM Supported Models List</a></li>
+                    <li><a class="dropdown-item" href="https://docs.google.com/spreadsheets/d/1yhMcH9BgwNWsUjz0r_CzJblZzc_ud8qmyJnAYpbfxMA/edit?gid=0#gid=0" target="_blank">AI/LLM Tier List</a></li>    
                 </ul>
             </li>
         </ul>
     </div>
+
+
+
+    <a href="https://www.youtube.com/@DwemerDynamics" target="_blank" style="padding-right: 5px;">
+    <img src="images/youtube.png" alt="Checkout our Youtube Channel">
+    </a>
     <a href="https://discord.gg/NDn9qud2ug" target="_blank" style="padding-right: 5px;">
     <img src="images/discord.png" alt="Join us on Discord">
     </a>
@@ -347,6 +410,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Prepare profile options
     $OPTIONS = [];
+    $i = 0;
     foreach ($GLOBALS["PROFILES"] as $lProfkey => $lProfile) {
         $pattern = "/conf_([a-fA-F0-9]+)\.php/";
         if (preg_match($pattern, $lProfile, $matches)) {
@@ -354,13 +418,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (isset($characterMap["$hash"])) {
                 $name = $characterMap["$hash"];
                 $value = $lProfile;
-                $OPTIONS[] = ["value" => $value, "name" => $name];
+                $OPTIONS[] = [
+                    "value" => $value, 
+                    "name"  => $name, 
+                    "index" => $i 
+                ];
+                $i++; 
                 $LOCAL_CHAR_NAME = $name;
             }
         } else if ($lProfkey) {
             $name = "* $lProfkey";
             $value = $lProfile;
-            $OPTIONS[] = ["value" => $value, "name" => $name];
+            $OPTIONS[] = [
+                "value" => $value, 
+                "name"  => $name, 
+                "index" => $i 
+            ];
+            $i++; 
             $LOCAL_CHAR_NAME = $lProfkey;
         }
         if (isset($_SESSION["PROFILE"]) && $_SESSION["PROFILE"] == $lProfile) {
@@ -473,26 +547,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             /* Favorite Button */
             .favorite-btn {
                 position: absolute;
-                top: 50%; /* Center vertically */
-                right: 8px; /* Align to the right */
-                transform: translateY(-50%); /* Adjusts for the button's height to truly center it */
+                top: 50%; 
+                right: 1px; 
+                transform: translateY(-50%) scale(0.8); /* Scale the button to 80% of its original size */
                 background: none;
                 border: none;
                 cursor: pointer;
-                font-size: 36px; /* 2x the original size of 18px */
-                color: #FFD700; /* Gold color for visibility */
-                transition: color 0.3s;
-                font-weight: bold; /* Make icon bold */
-                z-index: 1; /* Ensure it stays on top */
-                        }
+                font-size: 36px;
+                color: #FFD700; 
+                transition: color 0.3s, transform 0.3s; /* Smooth transition for hover effects */
+                font-weight: bold; 
+                z-index: 1;
+            }
 
             .favorite-btn.favorited {
                 color: #FFD700; /* Gold color for favorites */
             }
 
             .favorite-btn:hover {
-                color: #FFD700; /* Gold color on hover */
+                background:  #022a6a;
             }
+
 
             /* Open Overlay Button */
                         .open-overlay-btn {
@@ -566,8 +641,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     grid-template-columns: 1fr;
                 }
             }
-
-            /* Ensure profile-select-btn occupies full space except favorite button */
             .profile-select-btn {
                 width: 100%;
                 height: 100%;
@@ -582,8 +655,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 font-weight: bold; /* Make text bold */
             }
 
+            .profile-select-btn:hover {
+                background:  #022a6a;
+            }
+
             .profile-select-btn:focus {
                 outline: none;
+            }
+
+            .icon-link {
+                display: inline-flex;           /* Use flex to center content both vertically and horizontally */
+                align-items: center;           /* Vertical centering */
+                justify-content: center;       /* Horizontal centering */
+                width: 80px;                   /* Fixed width */
+                height: 40px;                  /* Fixed height */
+                background-color: red;         /* Button background color */
+                color: white;                  /* Button text/icon color */
+                text-decoration: none;         /* Remove underline */
+                border: none;                  /* No border */
+                border-radius: 5px;           /* Rounded corners */
+                font-size: 16px;               /* Icon/text size */
+                cursor: pointer;               /* Pointer on hover */
+                transition: background-color 0.3s ease; /* Smooth hover effect */
+            }
+
+            .icon-link:hover {
+            background-color: darkred; /* Darken background on hover */
             }
         </style>
     </head>
@@ -597,11 +694,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <!-- Overlay Content -->
             <div class="overlay-content">
                 <a href="#" class="close-btn">&times;</a>
-                <h2>Character Profile</h2>
-
+                <h2>Activated Character Profiles</h2>
+                <i><p>Refresh page to see new characters.</p></i>
                 <!-- A-Z and Favorites Filter Buttons -->
                 <div class="filter-buttons">
-                    <button class="filter-button" data-filter="all">All</button>
+                    <button class="filter-button" data-filter="latest">All</button>
                     <button class="filter-button" data-filter="favorites">Favorites</button>
                     <?php foreach (range('A', 'Z') as $letter): ?>
                         <button class="filter-button" data-filter="<?php echo $letter; ?>"><?php echo $letter; ?></button>
@@ -622,7 +719,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 // Determine if the profile is favorited
                                 $isFavorited = in_array($op['value'], $_SESSION['FAVORITES']);
                             ?>
-                            <div class="dropdown-option" data-filter-letter="<?php echo $isFavorited ? 'favorites' : $firstLetter; ?>">
+                            <div class="dropdown-option" 
+                                data-filter-letter="<?php echo $isFavorited ? 'favorites' : $firstLetter; ?>" 
+                                data-import-order="<?php echo $op['index']; ?>"> 
                                 <!-- Profile Selection Button -->
                                 <button type="submit" name="profileSelector" value="<?php echo $value; ?>" class="profile-select-btn" aria-label="Select profile <?php echo $name; ?>">
                                     <?php echo $name; ?>
@@ -667,7 +766,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 } else {
                                     container.style.display = 'none';
                                 }
-                            } else {
+                            } 
+                            // ADD THIS PART
+                            else if (filter === 'latest') {
+                                // Sort the .dropdown-option elements by data-import-order ASC
+                                const sortedContainers = Array.from(profileContainers).sort((a, b) => {
+                                    const aIndex = parseInt(a.getAttribute('data-import-order'), 10);
+                                    const bIndex = parseInt(b.getAttribute('data-import-order'), 10);
+                                    return aIndex - bIndex; // ascending
+                                });
+
+                                // Append them in the new order & show them, unless they start with '*'
+                                const parent = profileContainers[0].parentNode;
+                                sortedContainers.forEach(container => {
+                                    container.style.display = 'block'; // Show all profiles
+                                    parent.appendChild(container);
+                                });
+                            }
+                            else {
                                 const containerLetter = container.getAttribute('data-filter-letter');
                                 if (containerLetter === filter) {
                                     container.style.display = 'block';
@@ -679,8 +795,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     });
                 });
 
+
                 // Optionally, activate 'All' filter by default
-                const allFilterBtn = document.querySelector('.filter-button[data-filter="all"]');
+                const allFilterBtn = document.querySelector('.filter-button[data-filter="latest"]');
                 if (allFilterBtn) {
                     allFilterBtn.click();
                 }
@@ -769,7 +886,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $currentModel=DMgetCurrentModel();
     // Convert arrays to strings or use print_r for debugging
-    echo " <strong>AI/LLM Service(s):</strong> ";
+    echo " <strong>AI/LLM Connectors:</strong> ";
     echo is_array($CONNECTORS) ? '<span style="color: yellow;">' . implode(",", $CONNECTORS) . '</span> | ' : '<span style="color: yellow;">' . $CONNECTORS . '</span>';
     echo '
     <form action="cmd/action_toogle_model.php" method="get" style="display:inline;">
@@ -785,7 +902,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             cursor: pointer;
             transition: background-color 0.3s;
         " onmouseover="this.style.backgroundColor=\'#0056b3\';" onmouseout="this.style.backgroundColor=\'#0030b0\';">
-            Current AI Service ➡ <span style="color:yellow;">(' . htmlspecialchars($currentModel, ENT_QUOTES, 'UTF-8') . ')</span>
+            Current AI Connector ➡ <b><span style="color:yellow;">(' . htmlspecialchars($currentModel, ENT_QUOTES, 'UTF-8') . ')</span></b>
         </button>
     </form>';
     echo '
@@ -804,4 +921,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 </div>
 
-<main style="max-height:760px;overflow-y:scroll">
+<main style="max-height:750px;overflow-y:scroll">

@@ -45,16 +45,18 @@ class connector
         
         if (isset($GLOBALS["FEATURES"]["MEMORY_EMBEDDING"]["ENABLED"]) && $GLOBALS["FEATURES"]["MEMORY_EMBEDDING"]["ENABLED"] && isset($GLOBALS["MEMORY_STATEMENT"]) ) {
             foreach ($contextData as $n=>$contextline)  {
-                if (strpos($contextline["content"],"#MEMORY")===0) {
-                    $contextData[$n]["content"]=str_replace("#MEMORY","##\nMEMORY\n",$contextline["content"]."\n##\n");
-                } else if (strpos($contextline["content"],$GLOBALS["MEMORY_STATEMENT"])!==false) {
-                    $contextData[$n]["content"]=str_replace($GLOBALS["MEMORY_STATEMENT"],"(USE MEMORY reference)",$contextline["content"]);
+                if (is_array($contextline)) {
+
+                    if (strpos($contextline["content"],"#MEMORY")===0) {
+                        $contextData[$n]["content"]=str_replace("#MEMORY","##\nMEMORY\n",$contextline["content"]."\n##\n");
+                    } else if (strpos($contextline["content"],$GLOBALS["MEMORY_STATEMENT"])!==false) {
+                        $contextData[$n]["content"]=str_replace($GLOBALS["MEMORY_STATEMENT"],"(USE MEMORY reference)",$contextline["content"]);
+                    }
                 }
             }
         }
-        
-        $moods=explode(",",$GLOBALS["EMOTEMOODS"]);
-        shuffle($moods);
+
+        require_once(__DIR__.DIRECTORY_SEPARATOR."..".DIRECTORY_SEPARATOR."functions".DIRECTORY_SEPARATOR."json_response.php");
         
         if (isset($GLOBALS["PATCH_PROMPT_ENFORCE_ACTIONS"]) && $GLOBALS["PATCH_PROMPT_ENFORCE_ACTIONS"]) {
             $prefix="{$GLOBALS["COMMAND_PROMPT_ENFORCE_ACTIONS"]}";
@@ -63,59 +65,20 @@ class connector
             //$prefix="{$GLOBALS["COMMAND_PROMPT_ENFORCE_ACTIONS"]}";
         }
         
-        if (isset($GLOBALS["LANG_LLM_XTTS"])&&($GLOBALS["LANG_LLM_XTTS"])) {
-            $contextData[]= [
-                'role' => 'user', 
-                'content' => "{$prefix} Use '*Speech Style'. Use this JSON object to give your answer : ".json_encode([
-                    "character"=>$GLOBALS["HERIKA_NAME"],
-                    "listener"=>"specify who {$GLOBALS["HERIKA_NAME"]} is talking to",
-                    "mood"=>implode("|",$moods),
-                    "action"=>'a valid action, (refer to available actions list) or None',
-                    "target"=>"action's target",
-                    "lang"=>"en|es",
-                    "message"=>'lines of dialogue',
-                    
-                ])
-            ];
-        } else {
-            $contextData[]= [
-                'role' => 'user', 
-                'content' => "{$prefix} Use '*Speech Style'.Use this JSON object to give your answer : ".json_encode([
-                    "character"=>$GLOBALS["HERIKA_NAME"],
-                    "listener"=>"specify who {$GLOBALS["HERIKA_NAME"]} is talking to",
-                    "mood"=>implode("|",$moods),
-                    "action"=>'a valid action, (refer to available actions list) or None',
-                    "target"=>"action's target",
-                    "message"=>'lines of dialogue',
-                    
-                ])
-            ];
+        if (strpos($GLOBALS["HERIKA_PERS"],"#SpeechStyle")!==false) {
+            $speechReinforcement="Use #SpeechStyle.";
+        } else
+            $speechReinforcement="";
+
+        $contextData[]=[
+            'role' => 'user',
+            'content' => "{$prefix}. $speechReinforcement Use this JSON object to give your answer: ".json_encode($GLOBALS["responseTemplate"])
+        ];
+
+        if (isset($GLOBALS["FUNCTIONS_ARE_ENABLED"]) && $GLOBALS["FUNCTIONS_ARE_ENABLED"]) {
+            $contextData[0]["content"].=$GLOBALS["COMMAND_PROMPT"];
         }
-        
 
-
-        
-         if (isset($GLOBALS["FUNCTIONS_ARE_ENABLED"]) && $GLOBALS["FUNCTIONS_ARE_ENABLED"]) {
-            foreach ($GLOBALS["FUNCTIONS"] as $function) {
-                //$data["tools"][]=["type"=>"function","function"=>$function];
-                
-                if (strpos($function["name"],"Attack")!==false) {   // Every command starting with Attack
-                    $contextData[0]["content"].="\nAVAILABLE ACTION: {$function["name"]} : {$function["description"]} ";
-                    $contextData[0]["content"].="(available targets: ".implode(",",$GLOBALS["FUNCTION_PARM_INSPECT"]).")";
-                }/* else if ($function["name"]==$GLOBALS["F_NAMES"]["SetSpeed"]) {
-                    $contextData[0]["content"].="\nAVAILABLE ACTION: {$function["name"]} ({$function["description"]})";
-                    $contextData[0]["content"].="(run|fastwalk|jog|walk)";
-                }*/  else if ($function["name"]==$GLOBALS["F_NAMES"]["SearchMemory"]) {
-                    $contextData[0]["content"].="\nAVAILABLE ACTION: {$function["name"]} : {$function["description"]}";
-                 
-                } else
-                    $contextData[0]["content"].="\nAVAILABLE ACTION: {$function["name"]} : {$function["description"]}";
-            }
-            $contextData[0]["content"].="\nAVAILABLE ACTION: Talk";
-             
-
-        }
-        
         $pb=[];
         $pb["user"]="";
         
@@ -124,7 +87,12 @@ class connector
         $assistantRoleBuffer="";
         foreach ($contextDataOrig as $n=>$element) {
             
-            
+            if (!is_array($element)) {
+                error_log("Warning: $n=>$element was not an array");
+                continue;
+
+            }
+
             if ($n>=(sizeof($contextDataOrig)-1) && $element["role"]!="tool") {
                 // Last element
                 $pb["user"].=$element["content"];
@@ -261,8 +229,6 @@ class connector
         
 
         // Forcing JSON output
-      
-        
         
         
         
@@ -272,11 +238,18 @@ class connector
                 $contextData
             ,
             'stream' => true,
-            'max_tokens'=>$MAX_TOKENS,
+            'max_completion_tokens'=>$MAX_TOKENS,
             'temperature' => ($GLOBALS["CONNECTOR"][$this->name]["temperature"]) ?: 1,
             'top_p' => ($GLOBALS["CONNECTOR"][$this->name]["top_p"]) ?: 1,
             'response_format'=>["type"=>"json_object"]
+
         );
+
+        
+        if (isset($GLOBALS["CONNECTOR"][$this->name]["json_schema"]) && $GLOBALS["CONNECTOR"][$this->name]["json_schema"]) {
+            $data["response_format"]=$GLOBALS["structuredOutputTemplate"];
+        }
+
         // Mistral AI API does not support penalty params
         if (strpos($url, "mistral") === false) {
             $data["presence_penalty"]=($GLOBALS["CONNECTOR"][$this->name]["presence_penalty"]) ?: 0;
@@ -286,17 +259,17 @@ class connector
 
         if (isset($customParms["MAX_TOKENS"])) {
             if ($customParms["MAX_TOKENS"]==0) {
-                unset($data["max_tokens"]);
+                unset($data["max_completion_tokens"]);
             } elseif (isset($customParms["MAX_TOKENS"])) {
-                $data["max_tokens"]=$customParms["MAX_TOKENS"]+0;
+                $data["max_completion_tokens"]=$customParms["MAX_TOKENS"]+0;
             }
         }
 
         if (isset($GLOBALS["FORCE_MAX_TOKENS"])) {
             if ($GLOBALS["FORCE_MAX_TOKENS"]==0) {
-                unset($data["max_tokens"]);
+                unset($data["max_completion_tokens"]);
             } else
-                $data["max_tokens"]=$GLOBALS["FORCE_MAX_TOKENS"]+0;
+                $data["max_completion_tokens"]=$GLOBALS["FORCE_MAX_TOKENS"]+0;
             
         }
 
@@ -305,7 +278,7 @@ class connector
 
         $GLOBALS["DEBUG_DATA"]["full"]=($data);
 
-        file_put_contents(__DIR__."/../log/context_sent_to_llm.log",date(DATE_ATOM)."\n=\n".print_r($data,true)."=\n", FILE_APPEND);
+        file_put_contents(__DIR__."/../log/context_sent_to_llm.log",date(DATE_ATOM)."\n=\n".var_export($data,true)."\n=\n", FILE_APPEND);
 
         $headers = array(
             'Content-Type: application/json',
@@ -317,7 +290,8 @@ class connector
                 'method' => 'POST',
                 'header' => implode("\r\n", $headers),
                 'content' => json_encode($data),
-                'timeout' => ($GLOBALS["HTTP_TIMEOUT"]) ?: 30
+                'timeout' => ($GLOBALS["HTTP_TIMEOUT"]) ?: 30,
+                "ignore_errors" => true
             )
         );
 
@@ -325,28 +299,53 @@ class connector
         
         $this->primary_handler = fopen($url, 'r', false, $context);
         if (!$this->primary_handler) {
-                $error=error_get_last();
-                error_log(print_r($error,true));
+            $error=error_get_last();
+            error_log(print_r($error,true));
+
+            if ($GLOBALS["db"]) {
+                $GLOBALS["db"]->insert(
+                'audit_request',
+                    array(
+                        'request' => json_encode($data),
+                        'result' => $error["message"]
+                    ));
+            }
+            return null;
+        } else {
+            // Get HTTP response code
+            $response_info = stream_get_meta_data($this->primary_handler);
+            $status_line = $response_info['wrapper_data'][0];
+            preg_match('/\d{3}/', $status_line, $matches); // get three digits (200, 300, 404, etc)
+            $status_code = isset($matches[0]) ? intval($matches[0]) : null;
+
+            if ($status_code >= 300) {
+                $response = stream_get_contents($this->primary_handler);
+                $error_message = "Request to openaijson connector failed: {$status_line}.\nResponse body: {$response}";
+                trigger_error($error_message, E_USER_WARNING);
 
                 if ($GLOBALS["db"]) {
                     $GLOBALS["db"]->insert(
                     'audit_request',
                         array(
                             'request' => json_encode($data),
-                            'result' => $error["message"]
+                            'result' => $error_message
                         ));
                 }
-                return null;
-        } else  {
-            if ($GLOBALS["db"]) {
-                $GLOBALS["db"]->insert(
-                 'audit_request',
-                 array(
-                    'request' => json_encode($data),
-                    'result' => "Ok"
-                ));
-            }
 
+                $this->close();
+                $this->primary_handler=false;
+                return null;
+            } else  {
+                if ($GLOBALS["db"]) {
+                    $GLOBALS["db"]->insert(
+                    'audit_request',
+                    array(
+                        'request' => json_encode($data),
+                        'result' => "Ok"
+                    ));
+                }
+
+            }
         }
 
 
@@ -365,7 +364,11 @@ class connector
 
         static $numOutputTokens=0;
 
-        $line = fgets($this->primary_handler);
+        if (!$this->primary_handler) {
+            $line = "";
+        } else {
+            $line = fgets($this->primary_handler);
+        }
         $buffer="";
         $totalBuffer="";
         $finalData="";
@@ -429,9 +432,9 @@ class connector
     // Method to close the data processing operation
     public function close()
     {
-
-        fclose($this->primary_handler);
-        
+        if ($this->primary_handler) {
+            fclose($this->primary_handler);
+        }
         
         //file_put_contents(__DIR__."/../log/ouput_from_llm.log",$this->_buffer, FILE_APPEND | LOCK_EX);
         file_put_contents(__DIR__."/../log/output_from_llm.log",date(DATE_ATOM)."\n=\n".$this->_buffer."\n=\n", FILE_APPEND);
@@ -481,7 +484,7 @@ class connector
                             } else {
                                 $this->_commandBuffer[]="{$GLOBALS["HERIKA_NAME"]}|command|$functionCodeName@{$parsedResponse["target"]}\r\n";
                             }
-                        } else {
+                        } elseif ($parsedResponse["action"] != "Talk") {
                             error_log("Function not found for {$parsedResponse["action"]}");
                         }
                         
@@ -506,7 +509,7 @@ class connector
 
     public function isDone()
     {
-        return feof($this->primary_handler);
+        return !$this->primary_handler || feof($this->primary_handler);
     }
 
 }

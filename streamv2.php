@@ -27,6 +27,14 @@ if (DMgetCurrentModel()=="openai") {
 	$FUNCTIONS_ARE_ENABLED=true;
 	require($path . "main.php");
 	die();
+} else if (DMgetCurrentModel()=="google_openaijson") {
+	$FUNCTIONS_ARE_ENABLED=true;
+	require($path . "main.php");
+	die();
+}	else if (DMgetCurrentModel()=="web_connector") {
+		$FUNCTIONS_ARE_ENABLED=true;
+		require($path . "main.php");
+		die();
 } else if (DMgetCurrentModel()=="koboldcppjson") {
 	$FUNCTIONS_ARE_ENABLED=true;
 	require($path . "main.php");

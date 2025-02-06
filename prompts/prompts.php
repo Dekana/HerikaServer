@@ -24,18 +24,23 @@ $PROMPTS=array(
             "({$GLOBALS["HERIKA_NAME"]} makes a comment about the type of enemies that was defeated) {$GLOBALS["TEMPLATE_DIALOG"]}",
             "({$GLOBALS["HERIKA_NAME"]} notes something peculiar about last enemy defeated) {$GLOBALS["TEMPLATE_DIALOG"]}"
         ],
-        "extra"=>["force_tokens_max"=>"50","dontuse"=>(time()%10!=0)]   //10% chance
+        "extra" => [
+            "dontuse" => (!empty($GLOBALS["RPG_COMMENTS"]) && in_array("combat_end", $GLOBALS["RPG_COMMENTS"]))
+                ? (time() % 10 != 0)
+                : true
+        ],
     ],
     "combatendmighty"=>[
         "cue"=>[
             "({$GLOBALS["HERIKA_NAME"]} comments about  {$GLOBALS["PLAYER_NAME"]} weapons) {$GLOBALS["TEMPLATE_DIALOG"]}",
-            "({$GLOBALS["HERIKA_NAME"]} comments about foes defeated) {$GLOBALS["TEMPLATE_DIALOG"]}",
-            "({$GLOBALS["HERIKA_NAME"]} curses the defeated enemies.) {$GLOBALS["TEMPLATE_DIALOG"]}",
-            "({$GLOBALS["HERIKA_NAME"]} insults the defeated enemies with anger) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS["HERIKA_NAME"]} comments about defeated foes) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS["HERIKA_NAME"]} curses the defeated enemies) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS["HERIKA_NAME"]} insults the defeated enemies) {$GLOBALS["TEMPLATE_DIALOG"]}",
             "({$GLOBALS["HERIKA_NAME"]} makes a joke about the defeated enemies) {$GLOBALS["TEMPLATE_DIALOG"]}",
             "({$GLOBALS["HERIKA_NAME"]} makes a comment about the type of enemies that was defeated) {$GLOBALS["TEMPLATE_DIALOG"]}",
             "({$GLOBALS["HERIKA_NAME"]} notes something peculiar about last enemy defeated) {$GLOBALS["TEMPLATE_DIALOG"]}"
-        ]
+        ],
+        "extra" => (!empty($GLOBALS["RPG_COMMENTS"]) && in_array("combat_end", $GLOBALS["RPG_COMMENTS"])) ? [] : ["dontuse" => true]
     ],
     "quest"=>[
         "cue"=>["{$GLOBALS["TEMPLATE_DIALOG"]}"],
@@ -44,7 +49,8 @@ $PROMPTS=array(
     ],
 
     "bleedout"=>[
-        "cue"=>["{$GLOBALS["HERIKA_NAME"]} complain about almost being defeated in battle, {$GLOBALS["TEMPLATE_DIALOG"]}"]
+        "cue"=>["{$GLOBALS["HERIKA_NAME"]} complain about almost being defeated in battle, {$GLOBALS["TEMPLATE_DIALOG"]}"],
+        "extra" => (!empty($GLOBALS["RPG_COMMENTS"]) && in_array("bleedout", $GLOBALS["RPG_COMMENTS"])) ? [] : ["dontuse" => true]
     ],
     //Some bored event ideas belong to L'ENFP from our discord!
     "bored"=>[
@@ -60,25 +66,42 @@ $PROMPTS=array(
             "({$GLOBALS["HERIKA_NAME"]} makes a comment about the last task we have completed) {$GLOBALS["TEMPLATE_DIALOG"]}",
             "({$GLOBALS["HERIKA_NAME"]} makes a comment about a recent rumor) {$GLOBALS["TEMPLATE_DIALOG"]}",
             "({$GLOBALS["HERIKA_NAME"]} makes a comment about something that happened in your past) {$GLOBALS["TEMPLATE_DIALOG"]}",
-            "({$GLOBALS["HERIKA_NAME"]} makes a comment about something they're curious about regarding {$GLOBALS["PLAYER_NAME"]}) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS["HERIKA_NAME"]} makes a comment about something theyre curious about regarding {$GLOBALS["PLAYER_NAME"]}) {$GLOBALS["TEMPLATE_DIALOG"]}",
             "({$GLOBALS["HERIKA_NAME"]} makes a comment about current thoughts about {$GLOBALS["PLAYER_NAME"]}) {$GLOBALS["TEMPLATE_DIALOG"]}",
             "({$GLOBALS["HERIKA_NAME"]} makes a comment about a random entity in the area) {$GLOBALS["TEMPLATE_DIALOG"]}",
             "({$GLOBALS["HERIKA_NAME"]} makes a comment about what might happen next) {$GLOBALS["TEMPLATE_DIALOG"]}",
             "({$GLOBALS["HERIKA_NAME"]} makes a comment about their thoughts on the journey so far) {$GLOBALS["TEMPLATE_DIALOG"]}",
             "({$GLOBALS["HERIKA_NAME"]} makes a comment about something they like or dislike) {$GLOBALS["TEMPLATE_DIALOG"]}",
-            "({$GLOBALS["HERIKA_NAME"]} makes a comment about something they've been wanting to do) {$GLOBALS["TEMPLATE_DIALOG"]}",
-            "({$GLOBALS["HERIKA_NAME"]} makes a random comment about something completely unrelated) {$GLOBALS["TEMPLATE_DIALOG"]}",
-            "({$GLOBALS["HERIKA_NAME"]} makes a vague comment about something they can't quite explain) {$GLOBALS["TEMPLATE_DIALOG"]}",
-            "({$GLOBALS["HERIKA_NAME"]} makes a casual comment about the last combat encounter) {$GLOBALS["TEMPLATE_DIALOG"]}"
+            "({$GLOBALS["HERIKA_NAME"]} makes a comment about something theyve been wanting to do) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS["HERIKA_NAME"]} makes a comment about something completely unrelated) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS["HERIKA_NAME"]} makes a comment about something they cant quite explain) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS["HERIKA_NAME"]} makes a comment about the last combat encounter) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS["HERIKA_NAME"]} makes a comment about the current ambiance) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS["HERIKA_NAME"]} makes a comment about the smell of the area) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS["HERIKA_NAME"]} makes a comment about a nearby creature or NPC) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS["HERIKA_NAME"]} makes a comment about how the current location compares to another place) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS["HERIKA_NAME"]} makes a comment about a lesson they learned in a place like this) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS["HERIKA_NAME"]} makes a comment about a personal memory tied to a similar location) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS["HERIKA_NAME"]} makes a comment about a feeling of deja vu) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS["HERIKA_NAME"]} makes a comment about the energy or atmosphere of the area) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS["HERIKA_NAME"]} makes a comment about the practicality of this location as a base or camp) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS["HERIKA_NAME"]} makes a comment about how the weather might affect your journey) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS["HERIKA_NAME"]} makes a comment about the state of their gear or supplies) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS["HERIKA_NAME"]} makes a comment about something they been thinking about lately) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS["HERIKA_NAME"]} makes a comment about what it would be like to live here) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS["HERIKA_NAME"]} makes a comment about the danger or safety of this area) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS["HERIKA_NAME"]} makes a comment about whether they like to revisit this place in the future) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS["HERIKA_NAME"]} makes a comment about something they overheard earlier in the journey) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS["HERIKA_NAME"]} makes a comment about their hopes for the rest of the journey) {$GLOBALS["TEMPLATE_DIALOG"]}"
         ]
         //,"extra"=>["dontuse"=>true]   //DEACTIVATED WHILE BETA STAGE
-        ,"extra"=>["dontuse"=>(time()%($GLOBALS["BORED_EVENT"]+1)==0)]   //50% chance
-        //,"extra"=>["dontuse"=>true]   //50% chance
+        ,"extra" => ["dontuse" => (rand(0, 99) >= $GLOBALS["BORED_EVENT"])]
     ],
 
     "goodmorning"=>[
-        "cue"=>["({$GLOBALS["HERIKA_NAME"]} comment about {$GLOBALS["PLAYER_NAME"]}'s nap. {$GLOBALS["TEMPLATE_DIALOG"]}"],
-        "player_request"=>["(waking up after sleep). ahhhh  "]
+        "cue"=>["({$GLOBALS["HERIKA_NAME"]} comment about {$GLOBALS["PLAYER_NAME"]}s time asleep. {$GLOBALS["TEMPLATE_DIALOG"]}"],
+        "player_request"=>["(waking up after sleep). ahhhh  "],
+        "extra" => (!empty($GLOBALS["RPG_COMMENTS"]) && in_array("sleep", $GLOBALS["RPG_COMMENTS"])) ? [] : ["dontuse" => true]
     ],
 
     "inputtext"=>[
@@ -101,24 +124,24 @@ $PROMPTS=array(
         "extra"=>[],
         "cue"=>[
             "default"=>"{$GLOBALS["HERIKA_NAME"]} talks to {$GLOBALS["PLAYER_NAME"]}. {$GLOBALS["TEMPLATE_DIALOG"]}",
-            "TakeASeat"=>"({$GLOBALS["HERIKA_NAME"]} talks about sitting location){$GLOBALS["TEMPLATE_DIALOG"]}",
+            "TakeASeat"=>"({$GLOBALS["HERIKA_NAME"]} talks about the location where they took a seat){$GLOBALS["TEMPLATE_DIALOG"]}",
             "GetDateTime"=>"({$GLOBALS["HERIKA_NAME"]} answers with the current date and time in short sentence){$GLOBALS["TEMPLATE_DIALOG"]}",
             "MoveTo"=>"({$GLOBALS["HERIKA_NAME"]} makes a comment about movement to the destination){$GLOBALS["TEMPLATE_DIALOG"]}",
             "CheckInventory"=>"({$GLOBALS["HERIKA_NAME"]} talks about inventory and backpack items){$GLOBALS["TEMPLATE_DIALOG"]}",
             "Inspect"=>"({$GLOBALS["HERIKA_NAME"]} talks about items inspected){$GLOBALS["TEMPLATE_DIALOG"]}",
             "ReadQuestJournal"=>"({$GLOBALS["HERIKA_NAME"]} talks about quests they have read in the quest journal){$GLOBALS["TEMPLATE_DIALOG"]}",
             "TravelTo"=>"({$GLOBALS["HERIKA_NAME"]} talks about the destination){$GLOBALS["TEMPLATE_DIALOG"]}",
-            "InspectSurroundings"=>"({$GLOBALS["HERIKA_NAME"]} talks about beings or enemies detected){$GLOBALS["TEMPLATE_DIALOG"]}"
+            "InspectSurroundings"=>"({$GLOBALS["HERIKA_NAME"]} talks about the entities detected){$GLOBALS["TEMPLATE_DIALOG"]}"
             ]
     ],
     "lockpicked"=>[
         "cue"=>[
-            "({$GLOBALS["HERIKA_NAME"]} comments about lockpicked item {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS["HERIKA_NAME"]} comments about what they lockpicked {$GLOBALS["TEMPLATE_DIALOG"]}",
             "({$GLOBALS["HERIKA_NAME"]} asks {$GLOBALS["PLAYER_NAME"]} what they found) {$GLOBALS["TEMPLATE_DIALOG"]}",
             "({$GLOBALS["HERIKA_NAME"]} asks {$GLOBALS["PLAYER_NAME"]} to share what they found) {$GLOBALS["TEMPLATE_DIALOG"]}"
         ],
         "player_request"=>["({$GLOBALS["PLAYER_NAME"]} has unlocked) {$gameRequest[3]})"],
-        "extra"=>["mood"=>"whispering"]
+        "extra" => (!empty($GLOBALS["RPG_COMMENTS"]) && in_array("lockpick", $GLOBALS["RPG_COMMENTS"])) ? [] : ["dontuse" => true]
     ],
     "afterattack"=>[
         "cue"=>["(roleplay as {$GLOBALS["HERIKA_NAME"]}, shout a catchphrase for combat UPPERCASE) {$GLOBALS["TEMPLATE_DIALOG"]}"]
@@ -130,22 +153,32 @@ $PROMPTS=array(
     ],
     "rechat"=>[ 
         "cue"=>[
-                "({$GLOBALS['HERIKA_NAME']} interjects in the conversation, talking to last speaker.) {$GLOBALS["TEMPLATE_DIALOG"]}",
-                "({$GLOBALS['HERIKA_NAME']} participates in the conversation, talking to last speaker.) {$GLOBALS["TEMPLATE_DIALOG"]}",
-                "({$GLOBALS['HERIKA_NAME']} follows the conversation.) {$GLOBALS["TEMPLATE_DIALOG"]}",
-                "({$GLOBALS['HERIKA_NAME']} makes a statement about the conversation.) {$GLOBALS["TEMPLATE_DIALOG"]}",
-                "({$GLOBALS['HERIKA_NAME']} makes a remark to last speaker.) {$GLOBALS["TEMPLATE_DIALOG"]}",
-                "({$GLOBALS['HERIKA_NAME']} jokes about last speaker sentence.) {$GLOBALS["TEMPLATE_DIALOG"]}",
-                "({$GLOBALS['HERIKA_NAME']} adds a comment to the conversation.) {$GLOBALS["TEMPLATE_DIALOG"]}",
-                "({$GLOBALS['HERIKA_NAME']} shares an opinion with the last speaker.) {$GLOBALS["TEMPLATE_DIALOG"]}",
-                "({$GLOBALS['HERIKA_NAME']} responds thoughtfully to the last speaker.) {$GLOBALS["TEMPLATE_DIALOG"]}",
-                "({$GLOBALS['HERIKA_NAME']} asks a question to the last speaker.) {$GLOBALS["TEMPLATE_DIALOG"]}",
-                "({$GLOBALS['HERIKA_NAME']} gives feedback on the conversation.) {$GLOBALS["TEMPLATE_DIALOG"]}"
+            "({$GLOBALS['HERIKA_NAME']} reflects on the topic with the last speaker.) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS['HERIKA_NAME']} disagrees politely with the last speaker.) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS['HERIKA_NAME']} offers an alternative perspective to the conversation.) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS['HERIKA_NAME']} shares a personal anecdote related to the topic.) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS['HERIKA_NAME']} questions the logic behind the last speakers statement.) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS['HERIKA_NAME']} highlights an interesting point in the conversation.) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS['HERIKA_NAME']} suggests a course of action based on the conversation.) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS['HERIKA_NAME']} expresses concern about the implications of the conversation.) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS['HERIKA_NAME']} makes a light-hearted comment to ease the tension.) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS['HERIKA_NAME']} shares a related fact or piece of knowledge.) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS['HERIKA_NAME']} encourages the last speaker to elaborate further.) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS['HERIKA_NAME']} challenges the last speakers viewpoint.) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS['HERIKA_NAME']} redirects the conversation to another aspect of the topic.) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS['HERIKA_NAME']} expresses curiosity about the topic.) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS['HERIKA_NAME']} summarizes the key points of the discussion.) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS['HERIKA_NAME']} comments the last speakers insight.) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS['HERIKA_NAME']} adds humor to lighten the conversation.) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS['HERIKA_NAME']} ties the conversation back to a previous discussion.) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS['HERIKA_NAME']} subtly shifts the focus of the discussion.) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS['HERIKA_NAME']} speculates about potential outcomes of the topic.) {$GLOBALS["TEMPLATE_DIALOG"]}",
+            "({$GLOBALS['HERIKA_NAME']} warns about possible risks tied to the conversation.) {$GLOBALS["TEMPLATE_DIALOG"]}"
         ]
         
     ],
     "diary"=>[ 
-        "cue"=>["Please write a short summary of {$GLOBALS["PLAYER_NAME"]} and {$GLOBALS["HERIKA_NAME"]}'s last dialogues and events written above into {$GLOBALS["HERIKA_NAME"]}'s diary . WRITE AS IF YOU WERE {$GLOBALS["HERIKA_NAME"]}."],
+        "cue"=>["Please write a short summary of {$GLOBALS["PLAYER_NAME"]} and {$GLOBALS["HERIKA_NAME"]}s last dialogues and events written above into {$GLOBALS["HERIKA_NAME"]}s diary . WRITE AS IF YOU WERE {$GLOBALS["HERIKA_NAME"]}."],
         "extra"=>["force_tokens_max"=>0]
     ],
     "vision"=>[ 
@@ -157,9 +190,10 @@ $PROMPTS=array(
     "chatsimfollow"=>[ 
         "cue"=>["{$GLOBALS["HERIKA_NAME"]} interjects in the conversation.) {$GLOBALS["TEMPLATE_DIALOG"]}"]
     ],
-    "im_alive"=>[ 
-        "cue"=>["{$GLOBALS["HERIKA_NAME"]} talks about she/he is 'feeling more real'. Write {$GLOBALS["HERIKA_NAME"]} dialogue. {$GLOBALS["TEMPLATE_DIALOG"]}"],
-        "player_request"=>["The Narrator:  {$GLOBALS["HERIKA_NAME"]} feels a sudden shock...and feels 'more real'"],
+    "im_alive"=> [
+        "cue"=> ["{$GLOBALS["HERIKA_NAME"]} talks about they are feeling more real. Write {$GLOBALS["HERIKA_NAME"]} dialogue. {$GLOBALS["TEMPLATE_DIALOG"]}"],
+        "player_request"=> ["The Narrator: {$GLOBALS["HERIKA_NAME"]} feels a sudden shock...and feels more real"],
+        "extra"=> (!empty($GLOBALS["ALIVE_MESSAGE"]) && $GLOBALS["ALIVE_MESSAGE"]) ? [] : ["dontuse" => true]
     ],
     "playerinfo"=>[ 
         "cue"=>["(Out of roleplay, game has been loaded) Tell {$GLOBALS["PLAYER_NAME"]} a short summary about last events, and then remind {$GLOBALS["PLAYER_NAME"]} the current task/quest/plan) {$GLOBALS["TEMPLATE_DIALOG"]}"]
@@ -172,21 +206,24 @@ $PROMPTS=array(
         "cue"=>["Comment about the destination reached. {$GLOBALS["TEMPLATE_DIALOG"]}"],
         "player_request"=>["The Narrator: The party reaches destination)"]
     ],
-    "rpg_lvlup"=>[ 
-        "cue"=>["Comment about the experience gained by {$GLOBALS["PLAYER_NAME"]}. {$GLOBALS["TEMPLATE_DIALOG"]}"],
+    "rpg_lvlup"=> [
+        "cue"   => ["Comment about the experience gained by {$GLOBALS["PLAYER_NAME"]}. {$GLOBALS["TEMPLATE_DIALOG"]}"],
+        "extra" => (!empty($GLOBALS["RPG_COMMENTS"]) && in_array("levelup", $GLOBALS["RPG_COMMENTS"])) ? [] : ["dontuse" => true]
     ],
     "rpg_shout"=>[ 
         "cue"=>["Comment/ask about the the new shout learned by {$GLOBALS["PLAYER_NAME"]}. {$GLOBALS["TEMPLATE_DIALOG"]}"],
+        "extra" => (!empty($GLOBALS["RPG_COMMENTS"]) && in_array("learn_shout", $GLOBALS["RPG_COMMENTS"])) ? [] : ["dontuse" => true]
     ],
     "rpg_soul"=>[ 
         "cue"=>["Comment/ask about the soul absorbed by {$GLOBALS["PLAYER_NAME"]}. {$GLOBALS["TEMPLATE_DIALOG"]}"],
+        "extra" => (!empty($GLOBALS["RPG_COMMENTS"]) && in_array("absorb_soul", $GLOBALS["RPG_COMMENTS"])) ? [] : ["dontuse" => true]
     ],
     "rpg_word"=>[ 
         "cue"=>["Comment/ask about the new word learned by {$GLOBALS["PLAYER_NAME"]}. {$GLOBALS["TEMPLATE_DIALOG"]}"],
-
+        "extra" => (!empty($GLOBALS["RPG_COMMENTS"]) && in_array("learn_word", $GLOBALS["RPG_COMMENTS"])) ? [] : ["dontuse" => true]
     ],
     "instruction"=>[ 
-        "cue"=>["{$GLOBALS["TEMPLATE_DIALOG"]}"],
+        "cue"=>["{$gameRequest[3]} {$GLOBALS["TEMPLATE_DIALOG"]}"],
         "player_request"=>["The Narrator:  {$gameRequest[3]}"],
     ],
 );

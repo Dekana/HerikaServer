@@ -239,6 +239,9 @@ if ($gameRequest[0] == "init") { // Reset responses if init sent (Think about th
                 'localts' => time()
             )
         );
+    } else {
+        error_log(__FILE__." data was not an array");
+
     }
     $MUST_END=true;
 
@@ -330,11 +333,23 @@ if ($gameRequest[0] == "init") { // Reset responses if init sent (Think about th
         }
     } else
         $MUST_END=true;
-    
+    /*
     if (isset($GLOBALS["FEATURES"]["MISC"]["QUEST_COMMENT"]))
         if ($GLOBALS["FEATURES"]["MISC"]["QUEST_COMMENT"]===false)
             $MUST_END=true;
-
+    */
+    if (isset($GLOBALS["QUEST_COMMENT"])) {
+        // Remove the '%' from the value and convert it to an integer
+        $questCommentChance = (int)str_replace('%', '', $GLOBALS["QUEST_COMMENT_CHANCE"]);
+    
+        // Generate a random integer between 1 and 100 (inclusive).
+        $randomChance = random_int(1, 100);
+    
+        // Adjust the logic to reverse the chance
+        if ($randomChance > $questCommentChance || $GLOBALS["QUEST_COMMENT"] === false) {
+            $MUST_END = true;
+        }
+    }
 } elseif ($gameRequest[0] == "location") {
     logEvent($gameRequest);
     $MUST_END=true;
@@ -369,7 +384,7 @@ if ($gameRequest[0] == "init") { // Reset responses if init sent (Think about th
 } elseif ($gameRequest[0] == "playerdied") {
     
     
-    $lastSaveHistory=$db->fetchAll("select gamets from eventlog where type='infosaved' order by ts desc limit 1 offset 0");
+    $lastSaveHistory=$db->fetchAll("select gamets from eventlog where type='infosave' order by ts desc limit 1 offset 0");
     if (isset($lastSaveHistory[0]["ts"])) {
         $lastSave=$lastSaveHistory[0]["ts"];
         
@@ -454,11 +469,11 @@ if ($gameRequest[0] == "init") { // Reset responses if init sent (Think about th
     }
     
     
-    if (!isset($GLOBALS["CONNECTORS_DIARY"]) || !file_exists($enginePath . "connector" . DIRECTORY_SEPARATOR . "{$GLOBALS["CONNECTORS_DIARY"]}.php")) {
+    if (!isset($GLOBALS["CONNECTORS_DIARY"]) || !file_exists(__DIR__.DIRECTORY_SEPARATOR."..".DIRECTORY_SEPARATOR."connector".DIRECTORY_SEPARATOR."{$GLOBALS["CONNECTORS_DIARY"]}.php")) {
             ;
 	}
 	 else {
-		require_once $enginePath . "connector" . DIRECTORY_SEPARATOR . "{$GLOBALS["CONNECTORS_DIARY"]}.php";
+		require_once(__DIR__.DIRECTORY_SEPARATOR."..".DIRECTORY_SEPARATOR."connector".DIRECTORY_SEPARATOR."{$GLOBALS["CONNECTORS_DIARY"]}.php");
         
         $historyData="";
         $lastPlace="";
@@ -489,34 +504,17 @@ if ($gameRequest[0] == "init") { // Reset responses if init sent (Think about th
         $partyConf=DataGetCurrentPartyConf();
 		$partyConfA=json_decode($partyConf,true);
 		error_log($partyConf);
-		if (isset($partyConfA["{$GLOBALS["HERIKA_NAME"]}"])) {
-			$charDesc=print_r($partyConfA["{$GLOBALS["HERIKA_NAME"]}"],true).PHP_EOL.$GLOBALS["HERIKA_PERS"];
-			$currentProfile=$charDesc;
-		} else
-            $currentProfile=$GLOBALS["HERIKA_PERS"];
+		// Use the global DYNAMIC_PROMPT
+        $updateProfilePrompt = $GLOBALS["DYNAMIC_PROMPT"];
 
-		$head[]   = ["role"	=> "system", "content"	=> "You are an assistant. Will analyze a dialogue and then you will update a character profile based on that dialogue. ", ];
+		$head[]   = ["role"	=> "system", "content"	=> "You are an assistant. Analyze this dialogue and then update the dynamic character profile based on the information provided. ", ];
 		$prompt[] = ["role"	=> "user", "content"	=> "* Dialogue history:\n" .$historyData ];
-		$prompt[] = ["role"	=> "user", "content"	=> "Current character profile, for reference.:\n$currentProfile", ];
-		$prompt[] = ["role"=> "user", "content"	=> "Use Dialogue history to update and summarize character profile. 
-Mandatory Format:
-
-* Personality,(concise description, 75 words).
-* Bio: (birthplace, gender, race $SHORTER).
-* Speech style (15 keywords).
-* Current goal (15 keywords).
-* Relation with {$GLOBALS["PLAYER_NAME"]} (75 words).
-* Likes (15 keywords).
-* Fears 15 keywords, pay atention to dramatic past events).
-* Dislikes (15 keywords).
-* Current mood (15 keywords, use last events to determine). 
-* Relation with other followers if any.
-
-Profile must start with the title: 'Roleplay as {$GLOBALS["HERIKA_NAME"]}'.", ];
+		$prompt[] = ["role" => "user", "content" => "Current character profile you are updating:\n" . "Character name:\n"  . $GLOBALS["HERIKA_NAME"] . "Character static biography:\n" . $GLOBALS["HERIKA_PERS"] . "\n" ."Character dynamic biography (this is what you are updating):\n" . $GLOBALS["HERIKA_DYNAMIC"]];
+		$prompt[] = ["role"=> "user", "content"	=> $updateProfilePrompt, ];
 		$contextData       = array_merge($head, $prompt);
 		$connectionHandler = new connector();
-        
-		$connectionHandler->open($contextData, ["max_tokens"=>500]);
+        $GLOBALS["FORCE_MAX_TOKENS"]=1500;
+		$connectionHandler->open($contextData, ["max_tokens"=>1500]);
 		$buffer      = "";
 		$totalBuffer = "";
 		$breakFlag   = false;
@@ -541,7 +539,7 @@ Profile must start with the title: 'Roleplay as {$GLOBALS["HERIKA_NAME"]}'.", ];
 		$actions = $connectionHandler->processActions();
 		
 		
-		$responseParsed["HERIKA_PERS"]=$buffer;
+		$responseParsed["HERIKA_DYNAMIC"]=$buffer;
         
         $newConfFile=$_GET["profile"];
 
@@ -582,16 +580,23 @@ Profile must start with the title: 'Roleplay as {$GLOBALS["HERIKA_NAME"]}'.", ];
                 }
                 unset($file_lines[$i]);
             }
-        
-            
+
+            if(array_key_exists("CustomUpdateProfileFunction", $GLOBALS) && is_callable($GLOBALS["CustomUpdateProfileFunction"])) {
+                $responseParsed["HERIKA_DYNAMIC"] = $GLOBALS["CustomUpdateProfileFunction"]($buffer);
+            }
+
             file_put_contents($newFile, implode('', $file_lines));
-            file_put_contents($newFile, PHP_EOL.'$HERIKA_PERS=\''.addslashes($responseParsed["HERIKA_PERS"]).'\';'.PHP_EOL, FILE_APPEND | LOCK_EX);
+            $escapedDynamic = var_export($responseParsed["HERIKA_DYNAMIC"], true);
+            if (!is_string($responseParsed["HERIKA_DYNAMIC"]) || !$escapedDynamic) {
+                $escapedDynamic = '';
+            }
+            file_put_contents($newFile, PHP_EOL.'$HERIKA_DYNAMIC='.$escapedDynamic.';'.PHP_EOL, FILE_APPEND | LOCK_EX);
             file_put_contents($newFile, '?>'.PHP_EOL, FILE_APPEND | LOCK_EX);
             
         }
     
         //print_r($contextData);
-        //print_r($responseParsed["HERIKA_PERS"]);
+        //print_r($responseParsed["HERIKA_DYNAMIC"]);
         $MUST_END=true;
     
     }

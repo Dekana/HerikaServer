@@ -84,13 +84,17 @@ $GLOBALS["TTS_IN_USE"]=function($textString, $mood , $stringforhash)
 
         $root = $doc->createElement("speak");
         $root->setAttribute("version", "1.0");
+
+
+       
+
         $root->setAttribute("xml:lang", "en-us");
         $root->setAttribute("xmlns:mstts", "https://www.w3.org/2001/mstts");
 
 
         $voice = $doc->createElement("voice");
         //$voice->setAttribute( "xml:lang" , "en-us" );
-        $voice->setAttribute("xml:gender", "Female");
+        //$voice->setAttribute("xml:gender", "Female");
 
         $voiceId=$GLOBALS["TTS"]["AZURE"]["voice"];
 
@@ -98,6 +102,14 @@ $GLOBALS["TTS_IN_USE"]=function($textString, $mood , $stringforhash)
 			$voiceId=$GLOBALS["PATCH_OVERRIDE_VOICE"];
 
         
+            $pattern = '/^[a-z]{2}-[A-Z]{2}/'; // Matches language-region code at the start of the string
+            if (preg_match($pattern, $voiceId, $matches)) {
+            
+            $language = strtolower($matches[0]);
+            
+            $root->setAttribute("xml:lang", $language);
+
+        } 
 
         $voice->setAttribute("name", $voiceId); // Read https://learn.microsoft.com/es-es/azure/cognitive-services/speech-service/language-support?tabs=tts
 
@@ -161,7 +173,15 @@ $GLOBALS["TTS_IN_USE"]=function($textString, $mood , $stringforhash)
         }
         //fwrite(STDOUT, $result);
 
-        
+        $GLOBALS["TTS_FFMPEG_FILTERS"]["loudnorm"]="loudnorm=I=-16:TP=-1.5:LRA=11";
+       
+        if (is_array($GLOBALS["TTS_FFMPEG_FILTERS"])) {
+			$GLOBALS["TTS_FFMPEG_FILTERS"]["adelay"]="adelay=150|150";
+			$FFMPEG_FILTER='-af "'.implode(",",$GLOBALS["TTS_FFMPEG_FILTERS"]).'"';
+			
+		} else {
+			$FFMPEG_FILTER='-filter:a "adelay=150|150"';
+		}
 
         // Trying to avoid sync problems.
         $fileNameOrig=dirname((__FILE__)) . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "soundcache/" . md5(trim($stringforhash)) . "_orig.wav";
@@ -173,7 +193,7 @@ $GLOBALS["TTS_IN_USE"]=function($textString, $mood , $stringforhash)
         
         fsync($stream);
         fclose($stream);
-        shell_exec("ffmpeg -y -i $fileNameOrig -filter:a \"speechnorm=e=6:r=0.0001:l=1\" $fileName 2>/dev/null >/dev/null");
+        shell_exec("ffmpeg -y -i $fileNameOrig $FFMPEG_FILTER $fileName 2>/dev/null >/dev/null");
         
         //file_put_contents(dirname((__FILE__)) . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR."soundcache/" . md5(trim($stringforhash)) . ".wav", $result);
         file_put_contents(dirname((__FILE__)) . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "soundcache/" . md5(trim($stringforhash)) . ".txt", trim($data) . "\n\rCache:$cacheUsed\n\rtotal call time:" . (microtime(true) - $starTime) . " ms\n\rsize of wav ($size)\n\rfunction tts($textString,$mood / $validMood ,$stringforhash)");
