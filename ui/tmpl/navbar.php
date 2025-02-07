@@ -698,7 +698,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <i><p>Refresh page to see new characters.</p></i>
                 <!-- A-Z and Favorites Filter Buttons -->
                 <div class="filter-buttons">
-                    <button class="filter-button" data-filter="latest">All</button>
+                    <button class="filter-button" data-filter="all">All</button>
                     <button class="filter-button" data-filter="favorites">Favorites</button>
                     <?php foreach (range('A', 'Z') as $letter): ?>
                         <button class="filter-button" data-filter="<?php echo $letter; ?>"><?php echo $letter; ?></button>
@@ -778,13 +778,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                                 // Append them in the new order & show them, unless they start with '*'
                                 const parent = profileContainers[0].parentNode;
-                                const fragment = document.createDocumentFragment();
                                 sortedContainers.forEach(container => {
-                                    container.style.display = 'block'; // Show all profiles
-                                    fragment.appendChild(container);
+                                    const profileText = container.textContent.trim(); // Get the text content of the profile
+                                    if (profileText.startsWith('*')) {
+                                        container.style.display = 'none'; // Hide profiles starting with '*'
+                                    } else {
+                                        container.style.display = 'block'; // Show other profiles
+                                        parent.appendChild(container);
+                                    }
                                 });
-
-                                parent.appendChild(fragment);
                             }
                             else {
                                 const containerLetter = container.getAttribute('data-filter-letter');
@@ -800,7 +802,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
                 // Optionally, activate 'All' filter by default
-                const allFilterBtn = document.querySelector('.filter-button[data-filter="latest"]');
+                const allFilterBtn = document.querySelector('.filter-button[data-filter="all"]');
                 if (allFilterBtn) {
                     allFilterBtn.click();
                 }
@@ -905,7 +907,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             cursor: pointer;
             transition: background-color 0.3s;
         " onmouseover="this.style.backgroundColor=\'#0056b3\';" onmouseout="this.style.backgroundColor=\'#0030b0\';">
-            Current AI Connector ➡ <b><span style="color:yellow;">(' . htmlspecialchars($currentModel, ENT_QUOTES, 'UTF-8') . ')</span></b>
+            Current AI Service ➡ <span style="color:yellow;">(' . htmlspecialchars($currentModel, ENT_QUOTES, 'UTF-8') . ')</span>
         </button>
     </form>';
     echo '
