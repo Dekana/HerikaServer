@@ -778,10 +778,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                                 // Append them in the new order & show them, unless they start with '*'
                                 const parent = profileContainers[0].parentNode;
+                                const fragment = document.createDocumentFragment();
                                 sortedContainers.forEach(container => {
                                     container.style.display = 'block'; // Show all profiles
-                                    parent.appendChild(container);
+                                    fragment.appendChild(container);
                                 });
+
+                                parent.appendChild(fragment);
                             }
                             else {
                                 const containerLetter = container.getAttribute('data-filter-letter');
