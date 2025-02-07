@@ -131,40 +131,47 @@ class openai
         
 
         if ($b_groq) { // --- exception made for groq.com
-            // this sequence send only content chat completion
+            // this sequence send only content for chat completion
             
-            $data = array( // different: max_tokens
+            $data = array( 
                 'model' => (isset($GLOBALS["CONNECTOR"][$this->name]["model"])) ? $GLOBALS["CONNECTOR"][$this->name]["model"] : 'llama-3.3-70b-versatile', // short lifespan
-                'messages' => $contextData, // ok
+                'messages' => $contextData, 
                 'stream' => true, // required for CHIM
-                'max_tokens'=>$MAX_TOKENS,  //different
+                'max_completion_tokens'=>$MAX_TOKENS,  //changed,  max_tokens deprecated by groq in jan 2025
                 'temperature' => ($GLOBALS["CONNECTOR"][$this->name]["temperature"]) ?: 1, 
                 'top_p' => ($GLOBALS["CONNECTOR"][$this->name]["top_p"]) ?: 1, 
                 'presence_penalty' => ($GLOBALS["CONNECTOR"][$this->name]["presence_penalty"]) ?: 0, 
                 'frequency_penalty' => ($GLOBALS["CONNECTOR"][$this->name]["frequency_penalty"]) ?: 0 
             );
-
-            unset($data["max_completion_tokens"]); //probably not needed now
+                
+            if (!(stripos($data["model"],"deepseek-r1") === false)) { 
+            /*  deepseek r1 need "reasoning_format" parameter: 
+                parsed  - Separates reasoning into a dedicated field while keeping the response concise.
+                raw     - Includes reasoning within <think> tags in the content.
+                hidden  - Returns only the final answer for maximum efficiency. ! <think> tag is generated and only hidden, tokens are counted ! */
+                $data['reasoning_format'] = "hidden";  
+                //error_log(" deepseek-r1: " . print_r($data,false));
+            }
             
             if (isset($customParms["MAX_TOKENS"])) {
                 if ($customParms["MAX_TOKENS"]==0) {
-                    unset($data["max_tokens"]); //different 
+                    unset($data["max_completion_tokens"]); 
                 } elseif (isset($customParms["MAX_TOKENS"])) {
-                    $data["max_tokens"]=$customParms["MAX_TOKENS"]+0;
+                    $data["max_completion_tokens"]=$customParms["MAX_TOKENS"]+0;
                 }
             }
 
             if (isset($GLOBALS["FORCE_MAX_TOKENS"])) {
                 if ($GLOBALS["FORCE_MAX_TOKENS"]==0) {
-                    unset($data["max_tokens"]); //different
+                    unset($data["max_completion_tokens"]);
                 } else
-                    $data["max_tokens"]=$GLOBALS["FORCE_MAX_TOKENS"]+0;
+                    $data["max_completion_tokens"]=$GLOBALS["FORCE_MAX_TOKENS"]+0;
             }
 
         } else { // --- normal flow (not groq)
 
             $data = array(
-                'model' => (isset($GLOBALS["CONNECTOR"][$this->name]["model"])) ? $GLOBALS["CONNECTOR"][$this->name]["model"] : 'llama-3.3-70b-versatile',
+                'model' => (isset($GLOBALS["CONNECTOR"][$this->name]["model"])) ? $GLOBALS["CONNECTOR"][$this->name]["model"] : 'gpt-4o-mini',
                 'messages' =>
                     $contextData,
                 'stream' => true,

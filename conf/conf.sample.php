@@ -18,16 +18,19 @@ $MINIME_T5=false; //Assists smaller weight LLMs with action and memory functions
 //[Advanced Configuration]
 $RECHAT_H=2; //Rechat Rounds. Higher values will increase the amount of rounds NPC's will talk amongst themselves.
 $RECHAT_P=50; //Rechat Probability.
-$BORED_EVENT=5; //Bored Event Probability. Chance of an NPC starting a random conversation after a set period of time.
+$BORED_EVENT=30; //Bored Event Probability. Chance of an NPC starting a random conversation after a set period of time.
 $CONTEXT_HISTORY="50"; //Amount of context history (dialogue and events) that will be sent to LLM.
 $HTTP_TIMEOUT=15; //Timeout for AI requests.
 $CORE_LANG=""; //Custom languages. - language folder
-$NEWQUEUE=true; //Leave as is - read only
+$ALIVE_MESSAGE=true; //Leave as is - read only
 $MAX_WORDS_LIMIT=0; //Enforce a word limit for AI's responses. 0 = unlimited.
 $BOOK_EVENT_FULL=true; //Sends full contents of books to the AI
 $BOOK_EVENT_ALWAYS_NARRATOR=false; //Only The Narrator summarizes books.
 $NARRATOR_TALKS=true; //Enables the Narrator.
-$NARRATOR_WELCOME=false; //The Narrator will recap previous events after a save is loaded.
+$NARRATOR_WELCOME=true;
+$QUEST_COMMENT = false;
+$QUEST_COMMENT_CHANCE= "10%";
+ //The Narrator will recap previous events after a save is loaded.
 $LANG_LLM_XTTS=false; //XTTS Only! Will offer a language field to LLM, and will try match to XTTSv2 language.
 $HERIKA_ANIMATIONS=true; //Issues animations to AI driven NPCs.
 $EMOTEMOODS="sassy,"
@@ -60,6 +63,8 @@ $DYNAMIC_PROMPT = "Use the recent Dialogue history to update the dynamic charact
     . " Relation with other characters if any: "
     . "DO NOT WRITE HOW MANY KEYWORDS YOU HAVE USED OR OTHER META DATA!";
 
+$RPG_COMMENT=["levelup","learn_shout","learn_word","absorb_soul", "bleedout", "combat_end", "lockpick", "sleep"]; //AI Service(s).
+
 //[AI/LLM Service Selection]
 $CONNECTORS=["openrouterjson","openaijson","koboldcppjson"]; //AI Service(s).
 $CONNECTORS_DIARY=["openrouter","openai","google_openaijson","koboldcpp"]; //Creates diary entries and memories.
@@ -82,7 +87,7 @@ $CONNECTOR["openrouterjson"]["PREFILL_JSON"]=false; //Prefill JSON, Only valid f
 $CONNECTOR["openrouterjson"]["MAX_TOKENS_MEMORY"]='1024'; //Maximum tokens to generate when summarizing.
 $CONNECTOR["openrouterjson"]["API_KEY"]=""; //API key.
 $CONNECTOR["openrouterjson"]["xreferer"]="https://www.nexusmods.com/skyrimspecialedition/mods/89931"; //Stub needed header.
-$CONNECTOR["openrouterjson"]["xtitle"]="Skyrim AI Follower Framework"; //Stub needed header.
+$CONNECTOR["openrouterjson"]["xtitle"]="CHIM"; //Stub needed header.
 $CONNECTOR["openrouterjson"]["json_schema"]=false; //Enable OpenRouter JSON schema.
 //OpenRouter (Legacy)
 $CONNECTOR["openrouter"]["url"]="https://openrouter.ai/api/v1/chat/completions"; //API endpoint.
@@ -99,7 +104,7 @@ $CONNECTOR["openrouter"]["top_a"]=0; //LLM parameter top_a.
 $CONNECTOR["openrouter"]["MAX_TOKENS_MEMORY"]="1024"; //Maximum tokens to generate when summarizing.
 $CONNECTOR["openrouter"]["API_KEY"]=""; //API key.
 $CONNECTOR["openrouter"]["xreferer"]="https://www.nexusmods.com/skyrimspecialedition/mods/89931"; //Stub needed header.
-$CONNECTOR["openrouter"]["xtitle"]="Skyrim AI Follower Framework"; //Stub needed header.
+$CONNECTOR["openrouter"]["xtitle"]="CHIM"; //Stub needed header.
 //OpenAI JSON
 $CONNECTOR["openaijson"]["url"]="https://api.openai.com/v1/chat/completions"; //API endpoint.
 $CONNECTOR["openaijson"]["model"]='gpt-4o-mini'; //LLM model.
@@ -188,7 +193,7 @@ $TTS["MELOTTS"]["voiceid"]='malenord'; //Voice ID.
 $TTS["XTTSFASTAPI"]["endpoint"]='http://127.0.0.1:8020'; //API endpoint.
 $TTS["XTTSFASTAPI"]["language"]='en'; //Lanuguage.
 $TTS["XTTSFASTAPI"]["voiceid"]='TheNarrator'; //Generated voice file name.
-$TTS["XTTSFASTAPI"]["voicelogic"]='name';
+$TTS["XTTSFASTAPI"]["voicelogic"]='voicetype';
 //MIMIC3
 $TTS["MIMIC3"]["URL"]="http://127.0.0.1:59125"; //API endpoint. 
 $TTS["MIMIC3"]["voice"]="en_UK/apope_low#default"; //Voice ID.

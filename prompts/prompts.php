@@ -24,7 +24,11 @@ $PROMPTS=array(
             "({$GLOBALS["HERIKA_NAME"]} makes a comment about the type of enemies that was defeated) {$GLOBALS["TEMPLATE_DIALOG"]}",
             "({$GLOBALS["HERIKA_NAME"]} notes something peculiar about last enemy defeated) {$GLOBALS["TEMPLATE_DIALOG"]}"
         ],
-        "extra"=>["force_tokens_max"=>"50","dontuse"=>(time()%10!=0)]   //10% chance
+        "extra" => [
+            "dontuse" => (!empty($GLOBALS["RPG_COMMENTS"]) && in_array("combat_end", $GLOBALS["RPG_COMMENTS"]))
+                ? (time() % 10 != 0)
+                : true
+        ],
     ],
     "combatendmighty"=>[
         "cue"=>[
@@ -35,7 +39,8 @@ $PROMPTS=array(
             "({$GLOBALS["HERIKA_NAME"]} makes a joke about the defeated enemies) {$GLOBALS["TEMPLATE_DIALOG"]}",
             "({$GLOBALS["HERIKA_NAME"]} makes a comment about the type of enemies that was defeated) {$GLOBALS["TEMPLATE_DIALOG"]}",
             "({$GLOBALS["HERIKA_NAME"]} notes something peculiar about last enemy defeated) {$GLOBALS["TEMPLATE_DIALOG"]}"
-        ]
+        ],
+        "extra" => (!empty($GLOBALS["RPG_COMMENTS"]) && in_array("combat_end", $GLOBALS["RPG_COMMENTS"])) ? [] : ["dontuse" => true]
     ],
     "quest"=>[
         "cue"=>["{$GLOBALS["TEMPLATE_DIALOG"]}"],
@@ -44,7 +49,8 @@ $PROMPTS=array(
     ],
 
     "bleedout"=>[
-        "cue"=>["{$GLOBALS["HERIKA_NAME"]} complain about almost being defeated in battle, {$GLOBALS["TEMPLATE_DIALOG"]}"]
+        "cue"=>["{$GLOBALS["HERIKA_NAME"]} complain about almost being defeated in battle, {$GLOBALS["TEMPLATE_DIALOG"]}"],
+        "extra" => (!empty($GLOBALS["RPG_COMMENTS"]) && in_array("bleedout", $GLOBALS["RPG_COMMENTS"])) ? [] : ["dontuse" => true]
     ],
     //Some bored event ideas belong to L'ENFP from our discord!
     "bored"=>[
@@ -87,16 +93,15 @@ $PROMPTS=array(
             "({$GLOBALS["HERIKA_NAME"]} makes a comment about whether they like to revisit this place in the future) {$GLOBALS["TEMPLATE_DIALOG"]}",
             "({$GLOBALS["HERIKA_NAME"]} makes a comment about something they overheard earlier in the journey) {$GLOBALS["TEMPLATE_DIALOG"]}",
             "({$GLOBALS["HERIKA_NAME"]} makes a comment about their hopes for the rest of the journey) {$GLOBALS["TEMPLATE_DIALOG"]}"
-
         ]
         //,"extra"=>["dontuse"=>true]   //DEACTIVATED WHILE BETA STAGE
-        ,"extra" => ["dontuse" => false]   //50% chance
-        //,"extra"=>["dontuse"=>true]   //50% chance
+        ,"extra" => ["dontuse" => (rand(0, 99) >= $GLOBALS["BORED_EVENT"])]
     ],
 
     "goodmorning"=>[
         "cue"=>["({$GLOBALS["HERIKA_NAME"]} comment about {$GLOBALS["PLAYER_NAME"]}s time asleep. {$GLOBALS["TEMPLATE_DIALOG"]}"],
-        "player_request"=>["(waking up after sleep). ahhhh  "]
+        "player_request"=>["(waking up after sleep). ahhhh  "],
+        "extra" => (!empty($GLOBALS["RPG_COMMENTS"]) && in_array("sleep", $GLOBALS["RPG_COMMENTS"])) ? [] : ["dontuse" => true]
     ],
 
     "inputtext"=>[
@@ -136,7 +141,7 @@ $PROMPTS=array(
             "({$GLOBALS["HERIKA_NAME"]} asks {$GLOBALS["PLAYER_NAME"]} to share what they found) {$GLOBALS["TEMPLATE_DIALOG"]}"
         ],
         "player_request"=>["({$GLOBALS["PLAYER_NAME"]} has unlocked) {$gameRequest[3]})"],
-        "extra"=>["mood"=>"whispering"]
+        "extra" => (!empty($GLOBALS["RPG_COMMENTS"]) && in_array("lockpick", $GLOBALS["RPG_COMMENTS"])) ? [] : ["dontuse" => true]
     ],
     "afterattack"=>[
         "cue"=>["(roleplay as {$GLOBALS["HERIKA_NAME"]}, shout a catchphrase for combat UPPERCASE) {$GLOBALS["TEMPLATE_DIALOG"]}"]
@@ -185,9 +190,10 @@ $PROMPTS=array(
     "chatsimfollow"=>[ 
         "cue"=>["{$GLOBALS["HERIKA_NAME"]} interjects in the conversation.) {$GLOBALS["TEMPLATE_DIALOG"]}"]
     ],
-    "im_alive"=>[ 
-        "cue"=>["{$GLOBALS["HERIKA_NAME"]} talks about she/he is feeling more real. Write {$GLOBALS["HERIKA_NAME"]} dialogue. {$GLOBALS["TEMPLATE_DIALOG"]}"],
-        "player_request"=>["The Narrator:  {$GLOBALS["HERIKA_NAME"]} feels a sudden shock...and feels more real"],
+    "im_alive"=> [
+        "cue"=> ["{$GLOBALS["HERIKA_NAME"]} talks about they are feeling more real. Write {$GLOBALS["HERIKA_NAME"]} dialogue. {$GLOBALS["TEMPLATE_DIALOG"]}"],
+        "player_request"=> ["The Narrator: {$GLOBALS["HERIKA_NAME"]} feels a sudden shock...and feels more real"],
+        "extra"=> (!empty($GLOBALS["ALIVE_MESSAGE"]) && $GLOBALS["ALIVE_MESSAGE"]) ? [] : ["dontuse" => true]
     ],
     "playerinfo"=>[ 
         "cue"=>["(Out of roleplay, game has been loaded) Tell {$GLOBALS["PLAYER_NAME"]} a short summary about last events, and then remind {$GLOBALS["PLAYER_NAME"]} the current task/quest/plan) {$GLOBALS["TEMPLATE_DIALOG"]}"]
@@ -200,18 +206,21 @@ $PROMPTS=array(
         "cue"=>["Comment about the destination reached. {$GLOBALS["TEMPLATE_DIALOG"]}"],
         "player_request"=>["The Narrator: The party reaches destination)"]
     ],
-    "rpg_lvlup"=>[ 
-        "cue"=>["Comment about the experience gained by {$GLOBALS["PLAYER_NAME"]}. {$GLOBALS["TEMPLATE_DIALOG"]}"],
+    "rpg_lvlup"=> [
+        "cue"   => ["Comment about the experience gained by {$GLOBALS["PLAYER_NAME"]}. {$GLOBALS["TEMPLATE_DIALOG"]}"],
+        "extra" => (!empty($GLOBALS["RPG_COMMENTS"]) && in_array("levelup", $GLOBALS["RPG_COMMENTS"])) ? [] : ["dontuse" => true]
     ],
     "rpg_shout"=>[ 
         "cue"=>["Comment/ask about the the new shout learned by {$GLOBALS["PLAYER_NAME"]}. {$GLOBALS["TEMPLATE_DIALOG"]}"],
+        "extra" => (!empty($GLOBALS["RPG_COMMENTS"]) && in_array("learn_shout", $GLOBALS["RPG_COMMENTS"])) ? [] : ["dontuse" => true]
     ],
     "rpg_soul"=>[ 
         "cue"=>["Comment/ask about the soul absorbed by {$GLOBALS["PLAYER_NAME"]}. {$GLOBALS["TEMPLATE_DIALOG"]}"],
+        "extra" => (!empty($GLOBALS["RPG_COMMENTS"]) && in_array("absorb_soul", $GLOBALS["RPG_COMMENTS"])) ? [] : ["dontuse" => true]
     ],
     "rpg_word"=>[ 
         "cue"=>["Comment/ask about the new word learned by {$GLOBALS["PLAYER_NAME"]}. {$GLOBALS["TEMPLATE_DIALOG"]}"],
-
+        "extra" => (!empty($GLOBALS["RPG_COMMENTS"]) && in_array("learn_word", $GLOBALS["RPG_COMMENTS"])) ? [] : ["dontuse" => true]
     ],
     "instruction"=>[ 
         "cue"=>["{$gameRequest[3]} {$GLOBALS["TEMPLATE_DIALOG"]}"],

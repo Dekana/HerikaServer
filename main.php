@@ -381,11 +381,13 @@ if (in_array($gameRequest[0],["rechat"]) ) {
         die();
     }
     
-    $rndNumber=rand(1,100);
-    if ($rndNumber>($GLOBALS["RECHAT_P"]+0)) {              
-        //die();
-    } else
+    $rndNumber = rand(1, 100);
+    if ($rndNumber <= $GLOBALS["RECHAT_P"]) {
+        
+    }
+    else{
         die();
+    }
     
     
     if (sizeof($rechatHistory)>1) {
@@ -555,7 +557,7 @@ if (in_array($gameRequest[0],["inputtext","inputtext_s","ginputtext","ginputtext
     if (!empty($memoryInjection)) {
         
         //$memoryInjectionCtx[]= array('role' => 'user', 'content' => $gameRequest[3]);
-        $memoryInjectionCtx= array('role' => 'user', 'content' => "#MEMORY: {$GLOBALS["HERIKA_NAME"]} remembers this: [$memoryInjection]");
+        $memoryInjectionCtx[]= array('role' => 'user', 'content' => "#MEMORY: {$GLOBALS["HERIKA_NAME"]} remembers this: [$memoryInjection]");
         //$GLOBALS["COMMAND_PROMPT"].="'{$gameRequest[3]}'\n{$GLOBALS["HERIKA_NAME"]}):$memoryInjection\n";
         
     } else {
@@ -618,7 +620,7 @@ if (sizeof($memoryInjectionCtx)>0) {
     // Persist memory injetction
     $gameRequestCopy=$gameRequest;
     $gameRequestCopy[0]="infoaction";
-    $gameRequestCopy[3]=$memoryInjectionCtx["content"];
+    $gameRequestCopy[3]=$memoryInjectionCtx[0]["content"];
     logEvent($gameRequestCopy);
 }
 
