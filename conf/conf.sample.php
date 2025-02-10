@@ -14,6 +14,7 @@ $HERIKA_PERS="You are The Narrator in a Skyrim adventure. You will only talk to 
 $HERIKA_DYNAMIC=''; //Split Biography for information to be changed dynamically. 
 $DYNAMIC_PROFILE=false; //Dynamic profile updates during certain ingame events.
 $MINIME_T5=false; //Assists smaller weight LLMs with action and memory functions.
+$OGHMA_KNOWLEDGE="knowall"; //Assists smaller weight LLMs with action and memory functions.
 
 //[Advanced Configuration]
 $RECHAT_H=2; //Rechat Rounds. Higher values will increase the amount of rounds NPC's will talk amongst themselves.
@@ -23,7 +24,6 @@ $CONTEXT_HISTORY="50"; //Amount of context history (dialogue and events) that wi
 $HTTP_TIMEOUT=15; //Timeout for AI requests.
 $CORE_LANG=""; //Custom languages. - language folder
 $ALIVE_MESSAGE=true; //Leave as is - read only
-$NEWQUEUE=true; //Leave as is - read only
 $MAX_WORDS_LIMIT=0; //Enforce a word limit for AI's responses. 0 = unlimited.
 $BOOK_EVENT_FULL=true; //Sends full contents of books to the AI
 $BOOK_EVENT_ALWAYS_NARRATOR=false; //Only The Narrator summarizes books.
@@ -88,7 +88,7 @@ $CONNECTOR["openrouterjson"]["PREFILL_JSON"]=false; //Prefill JSON, Only valid f
 $CONNECTOR["openrouterjson"]["MAX_TOKENS_MEMORY"]='1024'; //Maximum tokens to generate when summarizing.
 $CONNECTOR["openrouterjson"]["API_KEY"]=""; //API key.
 $CONNECTOR["openrouterjson"]["xreferer"]="https://www.nexusmods.com/skyrimspecialedition/mods/89931"; //Stub needed header.
-$CONNECTOR["openrouterjson"]["xtitle"]="Skyrim AI Follower Framework"; //Stub needed header.
+$CONNECTOR["openrouterjson"]["xtitle"]="CHIM"; //Stub needed header.
 $CONNECTOR["openrouterjson"]["json_schema"]=false; //Enable OpenRouter JSON schema.
 //OpenRouter (Legacy)
 $CONNECTOR["openrouter"]["url"]="https://openrouter.ai/api/v1/chat/completions"; //API endpoint.
@@ -105,7 +105,7 @@ $CONNECTOR["openrouter"]["top_a"]=0; //LLM parameter top_a.
 $CONNECTOR["openrouter"]["MAX_TOKENS_MEMORY"]="1024"; //Maximum tokens to generate when summarizing.
 $CONNECTOR["openrouter"]["API_KEY"]=""; //API key.
 $CONNECTOR["openrouter"]["xreferer"]="https://www.nexusmods.com/skyrimspecialedition/mods/89931"; //Stub needed header.
-$CONNECTOR["openrouter"]["xtitle"]="Skyrim AI Follower Framework"; //Stub needed header.
+$CONNECTOR["openrouter"]["xtitle"]="CHIM"; //Stub needed header.
 //OpenAI JSON
 $CONNECTOR["openaijson"]["url"]="https://api.openai.com/v1/chat/completions"; //API endpoint.
 $CONNECTOR["openaijson"]["model"]='gpt-4o-mini'; //LLM model.

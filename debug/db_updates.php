@@ -480,6 +480,17 @@ if (checkVersion("combined_npc_templates")<20250129001) {
     updateVersion("combined_npc_templates",20250129001);
 }
 
-
+if (checkVersion("oghma")<20250902001) {
+    $query = "
+    ALTER TABLE oghma ADD COLUMN IF NOT EXISTS knowledge_class TEXT;
+    ALTER TABLE oghma ADD COLUMN IF NOT EXISTS topic_desc_basic TEXT;
+    ALTER TABLE oghma ADD COLUMN IF NOT EXISTS knowledge_class_basic TEXT;
+    ALTER TABLE oghma ADD COLUMN IF NOT EXISTS tags TEXT;
+    ALTER TABLE oghma ADD COLUMN IF NOT EXISTS category TEXT;
+   
+    ";
+    $db->execQuery($query);
+    updateVersion("oghma",20250902001);
+}
 
 ?>
