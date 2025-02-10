@@ -18,9 +18,9 @@
                 <ul class="dropdown-menu">
 
                 <!-- Events Category -->
-                <li><h6 class="dropdown-header">Events</h6></li>
+                <li><h6 class="dropdown-header">Events and Objectives</h6></li>
                 <li>
-                    <a class="dropdown-item" href="index.php?table=eventlog">Events</a>
+                    <a class="dropdown-item" href="index.php?table=eventlog">Event Log</a>
                 </li>
                 <li>
                     <a class="dropdown-item" href="index.php?table=eventlog&autorefresh=true">Monitor Events</a>
@@ -67,11 +67,11 @@
                         Clean Sent Events
                     </a>
                     </li>
-                    <li>-->
-                    <a class="dropdown-item" href="index.php?sendclean=true&table=response" title="This will clear the short term context buffer of events that will be sent with the AI prompt (CONTEXT_HISTORY). Will not delete events from the event log." onclick="return confirm('This will clear the short term context buffer of events that will be sent with the AI prompt (CONTEXT_HISTORY). Will not delete events from the event log. ARE YOU SURE?')">
+                    <li>
+                    <a class="dropdown-item" href="index.php?clean=true&table=response" title="This will clear the short term context buffer of events that will be sent with the AI prompt (CONTEXT_HISTORY). Will not delete events from the event log." onclick="return confirm('This will clear the short term context buffer of events that will be sent with the AI prompt (CONTEXT_HISTORY). Will not delete events from the event log. ARE YOU SURE?')">
                         Clear Current Context Events Buffer
                     </a>
-                    </li>
+                    </li>-->
                     <li>
                     <a class="dropdown-item" href="index.php?reset=true&table=event" title="Delete all events." onclick="return confirm('THIS WILL DELETE ALL EVENTS IN THE EVENT LOG! ARE YOU SURE???')">
                         Delete All Events

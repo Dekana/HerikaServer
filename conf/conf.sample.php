@@ -14,6 +14,7 @@ $HERIKA_PERS="You are The Narrator in a Skyrim adventure. You will only talk to 
 $HERIKA_DYNAMIC=''; //Split Biography for information to be changed dynamically. 
 $DYNAMIC_PROFILE=false; //Dynamic profile updates during certain ingame events.
 $MINIME_T5=false; //Assists smaller weight LLMs with action and memory functions.
+$OGHMA_KNOWLEDGE="knowall"; //Assists smaller weight LLMs with action and memory functions.
 
 //[Advanced Configuration]
 $RECHAT_H=2; //Rechat Rounds. Higher values will increase the amount of rounds NPC's will talk amongst themselves.

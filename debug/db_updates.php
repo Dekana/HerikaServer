@@ -490,7 +490,7 @@ if (checkVersion("oghma")<20250902001) {
    
     ";
     $db->execQuery($query);
-    updateVersion("oghma",20250129001);
+    updateVersion("oghma",20250902001);
 }
 
 ?>
