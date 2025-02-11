@@ -296,7 +296,7 @@ if ($existsColumn[0]["bad_syntax_exists"]) {
         $n++;
 
     }
-    error_log("Silent npc_name patch applied ($n npcs patched)");
+    error_log("Silent npc_name patch applied ($n npcs patched).If yu see this message too many times,probably some NPC are dupped in your database");
 }
 
 $query = "SELECT 1 as bad_syntax_exists  FROM npc_templates_custom WHERE  npc_name LIKE '%' || CHR(39) || '%'";
@@ -492,5 +492,55 @@ if (checkVersion("oghma")<20250902001) {
     $db->execQuery($query);
     updateVersion("oghma",20250902001);
 }
+
+
+// Pfff
+
+if (checkVersion("npc_templates_custom")<20250211001) {
+    $query="DROP VIEW public.combined_npc_templates;";
+   
+    $db->execQuery($query);
+
+    $query = "
+    ALTER TABLE npc_templates_custom 
+    ADD COLUMN IF NOT EXISTS npc_dynamic TEXT;
+    ALTER TABLE npc_templates_custom 
+    ADD COLUMN IF NOT EXISTS melotts_voiceid TEXT;
+    ALTER TABLE npc_templates_custom 
+    ADD COLUMN IF NOT EXISTS xtts_voiceid TEXT;
+    ALTER TABLE npc_templates_custom 
+    ADD COLUMN IF NOT EXISTS xvasynth_voiceid TEXT;
+    ";
+    $db->execQuery($query);
+
+    $query="
+    CREATE VIEW public.combined_npc_templates AS
+     SELECT c.npc_name,
+        c.npc_pers,
+        c.npc_dynamic,
+        c.npc_misc,
+        c.melotts_voiceid,
+        c.xtts_voiceid,
+        c.xvasynth_voiceid
+       FROM public.npc_templates_custom c
+    UNION ALL
+     SELECT t.npc_name,
+        t.npc_pers,
+        t.npc_dynamic,
+        t.npc_misc,
+        t.melotts_voiceid,
+        t.xtts_voiceid,
+        t.xvasynth_voiceid
+       FROM (public.npc_templates t
+         LEFT JOIN public.npc_templates_custom c ON (((t.npc_name)::text = (c.npc_name)::text)))
+      WHERE (c.npc_name IS NULL);";
+    
+    $db->execQuery($query);
+
+    updateVersion("npc_templates_custom",20250211001);
+    updateVersion("combined_npc_templates",20250211001);
+    error_log("Applied patch 20250211001");
+}
+
 
 ?>
