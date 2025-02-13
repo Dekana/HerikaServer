@@ -204,6 +204,7 @@ $TTS["MIMIC3"]["volume"]="60"; //Speech volume.
 $TTS["XVASYNTH"]["url"]='http://192.168.0.1:8008';	//xVASynth must be run in same machine as DwemerDistro, so this must be http://your-local-ip:8008
 $TTS["XVASYNTH"]["base_lang"]='en';	//Base language.
 $TTS["XVASYNTH"]["modelType"]='xVAPitch'; //ModelType.
+$TTS["XVASYNTH"]["game"]='skyrim'; //Game.
 $TTS["XVASYNTH"]["model"]='sk_malenord'; //Model.
 $TTS["XVASYNTH"]["pace"]=1.0; //Pace.
 $TTS["XVASYNTH"]["waveglowPath"]='resources/app/models/waveglow_256channels_universal_v4.pt'; //waveglowPath (relative).
