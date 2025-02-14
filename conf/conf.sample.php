@@ -64,7 +64,7 @@ $DYNAMIC_PROMPT = "Use the recent Dialogue history to update the dynamic charact
     . " Relation with other characters if any: "
     . "DO NOT WRITE HOW MANY KEYWORDS YOU HAVE USED OR OTHER META DATA!";
 
-$RPG_COMMENT=["levelup","learn_shout","learn_word","absorb_soul", "bleedout", "combat_end", "lockpick", "sleep"]; //AI Service(s).
+$RPG_COMMENTS=["levelup","learn_shout","learn_word","absorb_soul", "bleedout", "combat_end", "lockpick", "sleep", "keepmechecked"]; //AI Service(s).
 
 //[AI/LLM Service Selection]
 $CONNECTORS=["openrouterjson","openaijson","koboldcppjson"]; //AI Service(s).
@@ -204,6 +204,8 @@ $TTS["MIMIC3"]["volume"]="60"; //Speech volume.
 $TTS["XVASYNTH"]["url"]='http://192.168.0.1:8008';	//xVASynth must be run in same machine as DwemerDistro, so this must be http://your-local-ip:8008
 $TTS["XVASYNTH"]["base_lang"]='en';	//Base language.
 $TTS["XVASYNTH"]["modelType"]='xVAPitch'; //ModelType.
+$TTS["XVASYNTH"]["version"]='3.0'; //Version.
+$TTS["XVASYNTH"]["game"]='skyrim'; //Game.
 $TTS["XVASYNTH"]["model"]='sk_malenord'; //Model.
 $TTS["XVASYNTH"]["pace"]=1.0; //Pace.
 $TTS["XVASYNTH"]["waveglowPath"]='resources/app/models/waveglow_256channels_universal_v4.pt'; //waveglowPath (relative).
